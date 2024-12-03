@@ -50,10 +50,10 @@ dsc_sp_join <- dsc_sp %>%
   unique()%>% # filter out two grenadiers
   glimpse()
 
-
 # Joining dsc associations  with triptix
-triptix2 <- triptix%>%
-  left_join(dsc_sp_join, by = "SpeciesID",relationship = "many-to-many")%>%
+# NOTE HERE NEEDS TO BE LEFT JOIN WITH DSC LIST TO EXCLUDE SPECIES NOT CONSIDERED, INCLUDING INLAND SPECIES AND ALGAE AND ROE
+triptix2 <- dsc_sp_join%>%
+  left_join(triptix, by = "SpeciesID",relationship = "many-to-many")%>%
   glimpse()
 
 # --------------------------------------------------
@@ -90,23 +90,45 @@ triptix4 <- triptix3%>%
 
 # Exporting list of ports to excel to map to IO-PAC port groups (provided at link - table 9)
 # https://www.webapps.nwfsc.noaa.gov/assets/25/1620_08012011_142237_InputOutputModelTM111WebFinal.pdf
-portlist <- unique(triptix4[c("PortName", "PortID")])
+portlist <- unique(triptix4[c("PortName", "PortID")])%>%
+  arrange(PortName)%>%
+  glimpse()
 
 
 # Reading in port key # --------------------------------------------------
 # *** NOTE: manually grouped ports into port complexes according to above NOAA Tech Memo
 # *** For ports in CDFW triptix without corresponding IOPAC port complex, grouped as "California" (and CA mults applied)
-portkey_IOPAC <- read_csv("./data/portlist_allCA2.csv")%>% 
+# note portlist3 fixes mill creek and big creek and assigns them to monterey
+portkey_IOPAC <- read_csv("./data/portlist_allCA3.csv")%>% 
   select(c("PortName", "PortGroup_IOPAC"))%>%
   unique()%>%
   glimpse()
 
-# Joining IO-Pac port groups to triptix
+
+
+# Joining IO-PAC port groups to triptix
 triptix5 <- triptix4%>%
   left_join(portkey_IOPAC, by = "PortName", relationship = "many-to-many")%>%
+  arrange(PortGroup_IOPAC)%>%
   glimpse()
 
 
+# error checking -----------------------------
+unique(triptix5$PortGroup_IOPAC)
+
+triptix5%>%
+  filter(PortGroup_IOPAC=="California")%>%
+  arrange(COMMCD)
+
+triptix5%>%
+  filter(PortGroup_IOPAC=="California")%>%
+  select(PortName)%>%
+  unique()
+
+# these are all freshwater - omit about 60 records
+triptix6<-triptix5%>%
+  filter(PortGroup_IOPAC!="California")
+
 # save --------------------------------
-write_csv(triptix5,"./results/triptix_allCA3_io_pac.csv")
+write_csv(triptix6,"./results/triptix_allCA3_io_pac.csv")
 

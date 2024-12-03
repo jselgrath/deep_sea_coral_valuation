@@ -8,7 +8,7 @@
 #   COMMDC (commodity sector = species + gear)
 #   total values = vessel + processor
 
-
+# no multiplier data included in other data, so 
 #----------------------------------------------------------
 library(tidyverse); library(ggplot2)
 
@@ -24,38 +24,37 @@ d_cc<-read_csv("./results/commcd_dat2.csv")%>%glimpse()
 d1_a<-read_csv("./results/ec_port_bl_long.csv")%>%glimpse()
 d2_a<-read_csv("./results/ec_state_bl_long.csv")%>%glimpse()
 d3_a<-read_csv("./results/ec_annual_bl_long.csv")%>%glimpse()
-d4_a<-read_csv("./results/ec_noMult_bl_long.csv")%>%glimpse()
+# d4_a<-read_csv("./results/ec_noMult_port_bl_long.csv")%>%glimpse()
+# d5_a<-read_csv("./results/ec_noMult_state_bl_long.csv")%>%glimpse()
+# d6_a<-read_csv("./results/ec_noMult_annual_bl_long.csv")%>%glimpse()
 
 # proximity
 d1_b<-read_csv("./results/ec_port_pr_long.csv")%>%glimpse()
 d2_b<-read_csv("./results/ec_state_pr_long.csv")%>%glimpse()
 d3_b<-read_csv("./results/ec_annual_pr_long.csv")%>%glimpse()
-d4_b<-read_csv("./results/ec_noMult_pr_long.csv")%>%glimpse()
+# d4_b<-read_csv("./results/ec_noMult_port_pr_long.csv")%>%glimpse()
+# d5_b<-read_csv("./results/ec_noMult_state_pr_long.csv")%>%glimpse()
+# d6_b<-read_csv("./results/ec_noMult_annual_pr_long.csv")%>%glimpse()
 
 # habitat 12
 d1_b1<-read_csv("./results/ec_port_ha12_long.csv")%>%glimpse()
 d2_b1<-read_csv("./results/ec_state_ha12_long.csv")%>%glimpse()
 d3_b1<-read_csv("./results/ec_annual_ha12_long.csv")%>%glimpse()
-d4_b1<-read_csv("./results/ec_noMult_ha12_long.csv")%>%glimpse()
-
-# habitat 2 (definitely associated)
-# d1_b2<-read_csv("./results/ec_port_ha2_long.csv")%>%glimpse()
-# d2_b2<-read_csv("./results/ec_state_ha2_long.csv")%>%glimpse()
-# d3_b2<-read_csv("./results/ec_annual_ha2_long.csv")%>%glimpse()
-# d4_b2<-read_csv("./results/ec_noMult_ha2_long.csv")%>%glimpse()
+# d4_b1<-read_csv("./results/ec_noMult_port_ha12_long.csv")%>%glimpse()
+# d5_b1<-read_csv("./results/ec_noMult_state_ha12_long.csv")%>%glimpse()
+# d6_b1<-read_csv("./results/ec_noMult_annual_ha12_long.csv")%>%glimpse()
 
 # all species
 d1_c<-read_csv("./results/ec_port_allSp_long.csv")%>%glimpse()
 d2_c<-read_csv("./results/ec_state_allSp_long.csv")%>%glimpse()
 d3_c<-read_csv("./results/ec_annual_allSp_long.csv")%>%glimpse()
-d4_c<-read_csv("./results/ec_noMult_allSp_long.csv")%>%glimpse()
+# d4_c<-read_csv("./results/ec_noMult_port_allSp_long.csv")%>%glimpse()
+# d5_c<-read_csv("./results/ec_noMult_state_allSp_long.csv")%>%glimpse()
+# d6_c<-read_csv("./results/ec_noMult_annual_allSp_long.csv")%>%glimpse()
 
 
 
 # join data with all species and pivot longer #################################################
-
-# join all records for ports  ---------------------------
-d1_a[324,]
 
 # port, bl ---------------------------
 d5a<-d1_a%>%
@@ -204,7 +203,7 @@ d6d<-d6a2%>%
 d6d
 
 
-
+# ----------------------------------------------------------
 # join all annual records --------------------------------
 
 # bl -------------------------------
@@ -263,7 +262,6 @@ d7c2<-d7c%>%
 d7c2
 
 
-
 # join annual records
 d7d<-d7a2%>%
   rbind(d7b2)%>%
@@ -273,54 +271,9 @@ d7d<-d7a2%>%
 d7d
 
 
-# no mult join -------------------------------------
-# d8<-d4_a%>%
-#   full_join(d4_b)%>%
-#   full_join(d4_b1)%>%
-#   # full_join(d4_b2)%>%
-#   full_join(d4_c)%>% 
-#   unique()%>%
-#   glimpse()
-# 
-# d8%>%
-#   filter(value_noMult_bl!=value_noMult_allSp)
-
-# annual no multiplier
-# note 0s are really NAs
-# d9<-d8%>%
-#   select(-PortGroup_IOPAC)%>% 
-#   unique()%>%
-#   group_by(year,metric)%>%
-#   # filter(metric=="revenue")%>%
-#   summarize(
-#     value_noMult_annual_bl=sum(value_noMult_bl,na.rm=T),
-#     value_noMult_annual_pr=sum(value_noMult_pr,na.rm=T),
-#     value_noMult_annual_ha12=sum(value_noMult_ha12,na.rm=T),
-#     value_noMult_annual_ha2=sum(value_noMult_ha2,na.rm=T),
-#     value_noMult_annual_allSp=sum(value_noMult_allSp,na.rm=T)
-#   )%>%
-#   ungroup()%>%
-#   glimpse()
-# d9  
-  
-# join no mult to other datasets
-# d15<-d5%>%
-#   left_join(d8)%>% glimpse()
-# 
-# d16<-d6%>%
-#   left_join(d8)%>% glimpse() # only 2 are not matched
-# 
-# # note 0s are really NAs
-# d17<-d7%>%
-#   left_join(d9)%>% 
-#   glimpse()
-# 
-# 
-# d17%>%filter(value_noMult_annual_bl>=1)
-
 # save ###################
 write_csv(d5d,"./results/ec_port_all_long.csv")
 write_csv(d6d,"./results/ec_state_all_long.csv")
 write_csv(d7d,"./results/ec_annual_all_long.csv")
-# write_csv(d8,"./results/ec_noMult_all_long.csv")
+
 

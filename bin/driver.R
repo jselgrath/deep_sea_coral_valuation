@@ -48,12 +48,31 @@ source("./bin/fishtix_econ_clean_gear_cat.R")
 # join fishticket econ data with deep sea coral association data and io-pac data
 source("./bin/fishtix_econ_join_dsc_iopac.R")
 # input:    ./results/triptix_allCA2.csv
+#           ./data/dsc_fishery_association_long.csv
+#           ./data/IMPLAN/sp_key_iopac.csv
+#           ./data/IMPLAN/gear_key_iopac.csv
+#           ./data/portlist_allCA2.csv
 # output:   ./results/triptix_allCA3_io_pac.csv
 
 # summarize econ and iopac data by dsc association types
 source("./bin/fishtix_econ_dsc_summarize.R")
 # input:     ./results/triptix_allCA3_io_pac.csv
-# output:   many...
+#           ./data/IMPLAN/comm_mults_2020.csv
+# output:   files below, plus versions for other association types ..........
+
+# landings without multipliers
+#           ./results/nomults_port_bl.csv   
+#           ./results/nomults_commodity_bl.csv
+#           ./results/nomults_annrev_bl.csv
+
+# multipliers, but values NOT calculated
+#           ./results/revenue_bycommsector_wportmults_bl.csv
+#           ./results/revenue_bycommsector_wCAmults_bl.csv
+
+# values calculatd from multipliers
+#           ./results/econcontributions_portlevel_bl.csv                 # economic contributions - port multipliers
+#           ./results/econcontributions_statelevel_bl.csv                # economic contributions - state level multipliers, with commodity info
+#           ./results/econcontributions_statelevel_ann_bl.csv            # economic contributions - state level multipliers, no commodity info
 
 
 
@@ -64,35 +83,26 @@ source("./bin/commodity_codes_clean.R")
 # input:     ./data/commcd_dat.csv
 # output:    ./results/commcd_dat2.csv
 
-
-# check out files  -------------------
-source("./bin/check_files.R")
-# input: 
-# data for different data subsets (types of association)
-
-# datafile input
-# ./econcontributions_portlevel.csv
-# ./econcontributions_statelevel.csv
-# ./econcontributions_statelevel_ann.csv
-# ./catch_nomults.csv
-
-# output: none
-
-
 # change data from wide to long #updated ------------------------------------
 source("./bin/wide_long_2024.R") 
 # input:  ./results/econcontributions_portlevel_bl.csv  # input for all association types (bl, pr, etc).....
 #         ./results/econcontributions_statelevel_bl.csv
 #         ./results/econcontributions_statelevel_ann_bl.csv
-#         ./results/catch_nomults_bl.csv
+#         ./results/nomults_port_bl.csv")%>%    glimpse()
+#         ./results/nomults_commodity_bl.csv")%>%    glimpse()
+#         ./results/nomults_annrev_bl.csv
 #         ./results/commcd_dat2.csv
-# output: ./results/ec_port_bl_long.csv    # for port, state, no multipliers, etc.
+# output: ./results/ec_port_bl_long.csv    # for port, state, annual.
 #         ./results/ec_port_pr_long.csv
-#         ./results/ec_port_ha12_long.csv
 #         ./results/ec_port_ha2_long.csv
 #         ./results/ec_port_allSp_long.csv
+#         ./results/ec_noMult_port_bl_long.csv
+#         ./results/ec_noMult_port_pr_long.csv
+#         ./results/ec_noMult_port_ha12_long.csv
+#         ./results/ec_noMult_port_allSp_long.csv
 
 # bind all datasets together so can calculate proportions for all three data subsets
+# not including no multiplier data - gets too complicated, but also that info is still in the datasets
 source("./bin/join_data_2024.R")
 # input:  ./results/commcd_dat2.csv  # commodity codes
 #         ./results/ec_port_bl_long.csv    # for port, state, no multipliers, etc.
@@ -104,7 +114,7 @@ source("./bin/join_data_2024.R")
 # ./results/ec_port_all_long.csv
 # ./results/ec_state_all_long.csv
 # ./results/ec_annual_all_long.csv  
-# ./results/ec_noMult_all_long.csv - this is not yet in new data - need to update code
+
 
 
 # probably can skip this

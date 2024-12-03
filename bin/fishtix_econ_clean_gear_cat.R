@@ -30,7 +30,7 @@ tenyears <- c(2010:2020)
 #   mutate(month = month(LandingDate, label = TRUE))%>%  # Adding "month" variable
 #   glimpse()
 
-# value added to orig data
+# value added to orig data - this dataset from Jack
 triptix <- read_csv("./data/triptix_allCA.csv")%>%
   filter(year %in% tenyears)%>% # Filtering triptix for all CA by years of interest (2010-2020)
   mutate(LandingDate = as.Date(LandingDate, format = "%Y-%m-%d"))%>% # Setting Landing Date variable as class "date"
