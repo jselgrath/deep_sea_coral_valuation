@@ -29,37 +29,7 @@ d1 <- read_csv("./results/triptix_allCA3_io_pac.csv")%>%
   glimpse
 
 
-# ---------------------------------------------------------------------------------------
-# SET ASSOCIATION TYPE 
-# ------------------------------------------------------------------------------------
-# here basing associations on body length associations 
-# d1_bl <- d1 %>% 
-#   filter(assoc_body_length !=0)%>% # 
-#   mutate(assoc="bl")%>%
-#   mutate(assoc=if_else(assoc_body_length2=="No Data","No Data",assoc))%>%
-#   glimpse()
-# 
-# # here basing associations on proximity associations 
-# d1_pr <- d1 %>% 
-#   filter(assoc_proximity ==1)%>% # 
-#   mutate(assoc="pr")%>%
-#   glimpse()
-# 
-# # here basing associations on habitat associations (possible, and definite)
-# d1_ha12 <- d1 %>% 
-#   filter(assoc_habitat !=0)%>% # 
-#   mutate(assoc="ha12")%>%
-#   glimpse()
-# 
-# # here basing associations on habitat associations (definite)
-# d1_ha2 <- d1 %>% 
-#   filter(assoc_habitat ==2)%>% # 
-#   mutate(assoc="ha2")%>%
-#   glimpse()
-# 
-# d1_all<-d1%>%
-#   mutate(assoc="all")%>%
-#   glimpse()
+
 
 # --------------------------------------------------
 # catch summary table
