@@ -29,22 +29,28 @@ d3_a<-read_csv("./results/ec_annual_all_long.csv")%>% glimpse()
 
 ports<-read_csv("./data/ports_n_to_s.csv")%>% glimpse() # to reorder factor
 
+# check for NA category
+d3_a%>%
+  filter(is.na(association))%>%
+  glimpse()
 
+
+# ----------------------------------------------------
+# PORT LEVEL DATA ####--------------------------------
+# ----------------------------------------------------
 # add order for ports to be grouped geographically ----------------
 d1_ap<-d1_a%>%
   left_join(ports)%>%glimpse()
 
 filter(d1_ap,!is.na(port_order))%>%glimpse() # check
 
-# ----------------------------------------------------
-# PORT LEVEL DATA ####--------------------------------
-# ----------------------------------------------------
 unique(d1_ap$metric)
 
 
+
 d1<-d1_ap%>%
-  filter(metric=="TotOut"|metric=="TotInc"| metric=="TotEmp")%>% # these are the three most useful values
-  filter(!is.na(PortGroup_IOPAC))%>% # confirm but I think these are all 0s
+  filter(metric=="TotOut"|metric=="TotInc"| metric=="TotEmp")%>% # these are the three most useful values, revenue includes values with no multipliers
+  # filter(!is.na(PortGroup_IOPAC))%>% # confirm but I think these are all 0s
   mutate(
     metric2=str_replace_all(metric,pattern="TotEmp",replacement="Total Employment"),
     metric2=str_replace_all(metric2,pattern="TotOut",replacement="Total Output (million)"),
@@ -55,6 +61,7 @@ d1<-d1_ap%>%
          PortGroup_IOPAC=fct_reorder(PortGroup_IOPAC,port_order))%>%
   mutate(port_group=factor(port_group),
          port_group=fct_reorder(port_group,port_order))%>%
+  mutate(association=factor(association, levels = c("Associated","Definite Association", "Probable Association","Not Associated","Multispecies Group","No Data")))%>%
   glimpse()
 d1
 
@@ -98,16 +105,16 @@ glimpse(d1_b)
 # COMMODITY/STATE LEVEL DATA ####--------------------------------
 # ----------------------------------------------------
 d2<-d2_a%>%
-  filter(metric=="TotOut"|metric=="TotInc"| metric=="TotEmp")%>% # these are the three most useful values
-  filter(!is.na(value_state_allSp))%>% # remove NAs - confirm but should all  be 0
+  filter(metric=="TotOut_CA"|metric=="TotInc_CA"| metric=="TotEmp_CA")%>% # these are the three most useful values
+  filter(!is.na(value))%>% # remove NAs - confirm but should all  be 0
   mutate(
-    metric2=str_replace_all(metric,pattern="TotEmp",replacement="Total Employment"),
-    metric2=str_replace_all(metric2,pattern="TotOut",replacement="Total Output (million)"),
-    metric2=str_replace_all(metric2,pattern="TotInc",replacement="Total Income (million)"),
-    value_comm_1_mil=value_state_1/1000000,
-    value_comm_1NA_mil=value_state_1NA/1000000)%>%
+    metric2=str_replace_all(metric,pattern="TotEmp_CA",replacement="Total Employment (CA)"),
+    metric2=str_replace_all(metric2,pattern="TotOut_CA",replacement="Total Output (CA)(million)"),
+    metric2=str_replace_all(metric2,pattern="TotInc_CA",replacement="Total Income (CA)(million)"),
+    value_comm_1_mil=value/1000000)%>%
   mutate(commodity=factor(COMMCD))%>%
   mutate(desc=factor(DESCRIPTION))%>%
+  mutate(association=factor(association, levels = c("Associated","Definite Association", "Probable Association","Not Associated","Multispecies Group","No Data")))%>%
   glimpse()
 
 d2
@@ -117,32 +124,24 @@ glimpse(d2)
 names(d2)
 
 d2_b<-d2%>%
-  group_by(year, commodity, desc, metric, metric2,Sector)%>%
+  group_by(year, commodity, desc,sector,scale, assoc_type, association, metric, metric2)%>%
   summarize(
-    n=n(),
-    value_comm_1_b=      sum(value_state_1, na.rm=T),
-    value_comm_allSp_b=  sum(value_state_allSp, na.rm=T),
-    value_comm_1NA_b=    sum(value_state_1NA, na.rm=T),
-    value_comm_1_prp_b=  value_comm_1_b/value_comm_allSp_b,
-    value_comm_1NA_prp_b=value_comm_1NA_b/value_comm_allSp_b,
-    value_comm_1_mil_b=  value_comm_1_b/1000000,
-    value_comm_1NA_mil_b=value_comm_1NA_b/1000000)%>%
+      n=n(),
+      comm_value=sum(value,na.rm=T),
+      comm_value_u=mean(value,na.rm=T),
+      comm_value_sd=sd(value,na.rm=T),
+      comm_value_mil=sum(value,na.rm=T)/1000000)%>%
   ungroup()%>%
   glimpse()
 
-range(d2_b$value_comm_1_prp_b)
+d2_b
+
 
 # set finances to mil and employment to all
-d2_b$value_1<-d2_b$value_comm_1_mil_b
-d2_b$value_1[d2_b$metric=="Employment"]<-d2_b$value_comm_1_b[d2_b$metric=="Employment"]
-
-glimpse(d2_b)
-
-
-
-
-
-
+# d2_b$value_1<-d2_b$value_comm_1_mil_b
+# d2_b$value_1[d2_b$metric=="Employment"]<-d2_b$value_comm_1_b[d2_b$metric=="Employment"]
+# 
+# glimpse(d2_b)
 
 
 # --------------------------------------------------------------
@@ -151,22 +150,19 @@ glimpse(d2_b)
 
 # select values for graphing -------------------------
 d3<-d3_a%>%
-  filter(metric=="TotOut"|metric=="TotInc"| metric=="TotEmp")%>%
+  # filter(metric=="TotOut_CA2"|metric=="TotInc_CA2"| metric=="TotEmp_CA2"| metric=="Revenue")%>%
+  filter(metric=="TotOut_CA2"|metric=="TotInc_CA2"| metric=="TotEmp_CA2")%>%
   mutate(
-    metric2=str_replace_all(metric,pattern="TotEmp",replacement="Employment"),
-    metric2=str_replace_all(metric2,pattern="TotOut",replacement="Output (million)"),
-    metric2=str_replace_all(metric2,pattern="TotInc",replacement="Income (million)"),
-    value_1_mil=value_annual_1/1000000,
-    value_1NA_mil=value_annual_1NA/1000000)%>%
+    metric2=str_replace_all(metric,pattern="TotEmp_CA2",replacement="Employment"),
+    metric2=str_replace_all(metric2,pattern="TotOut_CA2",replacement="Output (million)"),
+    metric2=str_replace_all(metric2,pattern="TotInc_CA2",replacement="Income (million)"),
+    value_annual_1_mil=value/1000000)%>%
+  mutate(association=factor(association, levels = c("Associated","Definite Association", "Probable Association","Not Associated","Multispecies Group","No Data")))%>%
   glimpse()
 
-unique(d3$metric)
+d3$association
 
-# set finances to mil and employment to all
-d3$value_1<-d3$value_1_mil
-d3$value_1[d3$metric=="TotEmp"]<-d3$value_annual_1[d3$metric=="TotEmp"]
 
-d3
 
 
 
@@ -182,50 +178,82 @@ metric_labs<-c("TotEmp"="Employment", "TotInc"="Income", "TotOut"= "Output")
 metric_labs_p<-c("TotEmp"="Employment (Proportion)", "TotInc"="Income (Proportion)", "TotOut"= "Output (Proportion)")
 
 # split data by metric so scales are easier to interpret ---------------------------
-d1_be<-d1_b%>%filter(metric=="TotEmp")
-d1_bi<-d1_b%>%filter(metric=="TotInc")
-d1_bo<-d1_b%>%filter(metric=="TotOut")
 
-d2_be<-d2_b%>%filter(metric=="TotEmp")
-d2_bi<-d2_b%>%filter(metric=="TotInc")
-d2_bo<-d2_b%>%filter(metric=="TotOut")
+# port
+d1_be<-d1_b%>%filter(metric=="TotEmp")%>%glimpse()
+d1_be
+
+d1_bi<-d1_b%>%filter(metric=="TotInc")%>%glimpse()
+d1_bo<-d1_b%>%filter(metric=="TotOut")%>%glimpse()
+
+# commodity
+d2_be<-d2_b%>%filter(metric=="TotEmp_CA")%>%glimpse()
+d2_bi<-d2_b%>%filter(metric=="TotInc_CA")%>%glimpse()
+d2_bo<-d2_b%>%filter(metric=="TotOut_CA")%>%glimpse()
 
 
 
 # --------------------------------------------------------------
 # STATE LEVEL SUMMARIZED DATA ###### ---------------------------
 # --------------------------------------------------------------
+d3%>%
+  filter(is.na(association))%>%
+  glimpse()
 
 # graph annual totals
-ggplot(data=d3,aes(x=year,y=value_1, color=metric2))+
-  geom_line(size=1.2)+
-  scale_color_discrete_sequential(palette = "Hawaii")+
-  geom_hline(yintercept=0,color="lightgrey")+
-  deets8+
-  facet_wrap(vars(metric2), nrow=3,scales="free_y", labeller = labeller(metric=metric_labs_t))+
-  ylab("Total Contributions to California")+
-  # scale_y_continuous("Deep Sea Coral Associated Spp.\nTotal (CA)", limits=c(-.1,1),breaks=c(0,.5,1))+
-  scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+f1<-function(dta,assoc){
+  dta%>%
+    filter(assoc_type==assoc)%>%
+    ggplot(aes(x=year,y=value_annual_1_mil, fill=association))+
+      geom_area()+ #geom_line(size=1.2)+ #geom_smooth
+      scale_fill_discrete_sequential(palette = "Hawaii")+
+      geom_hline(yintercept=0,color="lightgrey")+
+      deets9+
+      facet_wrap(vars(metric2), nrow=3,scales="free_y", labeller = labeller(metric=metric_labs_t))+
+      ylab("Total Contributions to California")+
+      # scale_y_continuous("Deep Sea Coral Associated Spp.\nTotal (CA)", limits=c(-.1,1),breaks=c(0,.5,1))+
+      scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+}
 
-ggsave("./doc/graph_annual.jpg",height=8,width=4)
+  
+f1(dta=d3,assoc="bl") 
+ggsave("./doc/graph_annual_bl3.jpg",height=8,width=4)
+
+f1(dta=d3,assoc="pr") 
+ggsave("./doc/graph_annual_pr3.jpg",height=8,width=4)
+
+f1(dta=d3,assoc="ha12") 
+ggsave("./doc/graph_annual_ha123.jpg",height=8,width=4)
+
 
 
 # graph percent of annual totals
-ggplot(data=d3,aes(x=year,y=value_annual_1_prp, color=metric))+
-  geom_hline(yintercept=0,color="lightgrey")+
-  geom_hline(yintercept=.75,color="lightgrey")+
-  geom_line(size=1.2)+
-  scale_color_discrete_sequential(palette = "Hawaii")+
-  deets8+
-  facet_wrap(vars(metric), nrow=3,scales="free_y", labeller = labeller(metric=metric_labs_p))+
-  # ylab("Proportion of Contributions to California Fisheries")+
-  # facet_wrap(vars(metric), nrow=3, labeller = labeller(metric=metric_labs_p))+
-  # ylab("Proportion of State Fisheries")+
-  scale_y_continuous("Proportional Contributions to California Fisheries", limits=c(-.1,1),breaks=c(0,.5,1))+
-  # scale_y_continuous("Annual Deep Sea Coral Contributions \n(proportion of fisheries)", limits=c(-.1,1),breaks=c(0,.5,1))+
-  scale_x_continuous("Year", limits=c(2010,2020),breaks=c(2010,2015,2020))
+f2<-function(dta,assoc){
+  dta%>%
+    filter(assoc_type==assoc)%>%
+    ggplot(aes(x=year,y=proportion, fill=association))+
+    geom_area()+ #geom_line(size=1.2)+ #geom_smooth
+    scale_fill_discrete_sequential(palette = "Hawaii")+
+    geom_hline(yintercept=0,color="lightgrey")+
+    deets9+
+    facet_wrap(vars(metric2), nrow=3,scales="free_y", labeller = labeller(metric=metric_labs_p))+
+    ylab("Proportional Contributions to California Fisheries")+ #, limits=c(-.1,1),breaks=c(0,.5,1)
+    # scale_y_continuous("Annual Deep Sea Coral Contributions \n(proportion of fisheries)", limits=c(-.1,1),breaks=c(0,.5,1))+
+    scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+}
 
-ggsave("./doc/graph_annual_prop.jpg",height=8,width=4)
+f2(dta=d3,assoc="bl") 
+ggsave("./doc/graph_annual_bl_p3.jpg",height=8,width=4)
+
+f2(dta=d3,assoc="pr") 
+ggsave("./doc/graph_annual_pr_p3.jpg",height=8,width=4)
+
+f2(dta=d3,assoc="ha12") 
+ggsave("./doc/graph_annual_ha12_p3.jpg",height=8,width=4)
+
+
+
+
 
 
 
@@ -240,6 +268,34 @@ ggsave("./doc/graph_annual_prop.jpg",height=8,width=4)
 
 
 #  port total - all metrics in one graph  --------------------------------------------
+
+d1g<-d1%>%
+  filter(metric2=="TotOut")
+
+# graph percent of annual totals
+f3<-function(dta,assoc){
+  dta%>%
+    filter(assoc_type==assoc)%>%
+    ggplot(aes(x=year,y=value_port_1_mil, color=association))+
+    geom_line(size=1.2)+ #geom_area()+ #geom_smooth
+    scale_color_discrete_sequential(palette = "TealGrn")+
+    geom_hline(yintercept=0,color="lightgrey")+
+    deets9+ #8
+    facet_grid(port_group~metric2,scales="free")+
+    # facet_wrap(vars(metric2), nrow=3,scales="free_y", labeller = labeller(metric=metric_labs_p))+
+    ylab("Contributions by Port")+
+    scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+}
+
+f3(dta=d1g,assoc="bl") 
+ggsave("./doc/graph_port_bl_p3.jpg",height=8,width=4)
+
+f3(dta=d1,assoc="pr") 
+ggsave("./doc/graph_port_pr_p3.jpg",height=8,width=4)
+
+f3(dta=d1,assoc="ha12") 
+ggsave("./doc/graph_port_ha12_p3.jpg",height=8,width=4)
+
 ggplot(data=d1_b,aes(x=year,y=value_port_1_mil_b, color=metric2))+
   geom_line(size=1.2)+
   scale_color_discrete_sequential(palette = "TealGrn")+
