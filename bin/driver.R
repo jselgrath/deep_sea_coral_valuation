@@ -71,6 +71,7 @@ source("./bin/fishtix_econ_dsc_summarize.R")
 
 # values calculatd from multipliers
 #           ./results/econcontributions_portlevel_bl.csv                 # economic contributions - port multipliers
+#           ./results/ec_port_com_all_long.csv                          # economic contributions - port multipliers, with commodity info
 #           ./results/econcontributions_statelevel_bl.csv                # economic contributions - state level multipliers, with commodity info
 #           ./results/econcontributions_statelevel_ann_bl.csv            # economic contributions - state level multipliers, no commodity info
 
@@ -84,6 +85,7 @@ source("./bin/commodity_codes_clean.R")
 # output:    ./results/commcd_dat2.csv
 
 # change data from wide to long #updated ------------------------------------
+# since no multiplier data is in long form, removed those data from this code
 source("./bin/wide_long_2024.R") 
 # input:  ./results/econcontributions_portlevel_bl.csv  # input for all association types (bl, pr, etc).....
 #         ./results/econcontributions_statelevel_bl.csv
@@ -148,10 +150,21 @@ source("./bin/graphs_port.R")
 
 source("./bin/graphs_state_commodity.R")
 # input:  ./results/ec_state_all_long.csv
-# output:
-#         
-#         
-#         
+# output: ./doc/graph_comm.jpg
+#         ./doc/graph_comm_inc_1m_pr.jpg
+#         ./doc/graph_comm_pr_i1.jpg                    # e = employment, i = income, o = output
+#         ./doc/graph_comm_pr_i2.jpg                    # pr = proximity, ha12 = habitat/depth
+#         ./doc/graph_comm_pr_i3.jpg
+#         ./doc/graph_comm_ha12_i1.jpg
+#         ./doc/graph_comm_ha12_i2.jpg
+#         ./doc/graph_comm_ha12_i3.jpg
+#         ./doc/graph_comm_pr_o1.jpg
+#         ./doc/graph_comm_pr_o2.jpg
+#         ./doc/graph_comm_pr_o3.jpg
+#         ./doc/graph_comm_ha12_o1.jpg                  # 1 = area, assoc colors
+#         ./doc/graph_comm_ha12_o2.jpg                  # 2 = line, assoc colors
+#         ./doc/graph_comm_ha12_o3.jpg                  # 3 = line, commodity colors
+
 
 
 
