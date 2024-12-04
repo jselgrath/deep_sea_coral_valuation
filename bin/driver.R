@@ -128,17 +128,43 @@ source("./bin/join_data_2024.R")
 # output: ./results/ec_comm_all_long2.csv
 
 
-# graph data
-source("graph1b.R")
-# input:
-# ./results/ec_port_all_long.csv
-# ./results/ec_state_all_long.csv
-# ./results/ec_annual_all_long.csv
-
+# graph data --------------------------------------------------------
+source("./bin/graph_state_annual.R")
+# input: ./results/ec_annual_all_long.csv
 # output:
 #  ./doc/graph_annual_prop.jpg
 #  ./doc/graph_annual.jpg
-# many...
+
+source("./bin/graphs_port.R")
+# input:  ./results/ec_port_all_long.csv
+# output: ./doc/graph_port_pr_i1.jpg                      # proximity, association
+#         ./doc/graph_port_pr_i2.jpg                      # port, assoc colors
+#         ./doc/graph_port_pr_i3.jpg                      # port, port colors
+#         ./doc/graph_port_ha12_i1.jpg                    # habitat, association
+#         ./doc/graph_port_ha12_i2.jpg                    # port, assoc colors
+#         ./doc/graph_port_ha12_i3.jpg                    # port, port colors
+
+
+
+source("./bin/graphs_state_commodity.R")
+# input:  ./results/ec_state_all_long.csv
+# output:
+#         
+#         
+#         
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

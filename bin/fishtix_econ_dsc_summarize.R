@@ -13,6 +13,7 @@
 # "other species, trawl", "salmon, fixed gear", 
 # No SB mults for Sablefish trawl, whiting trawl
 
+# will need to create separate tables for two spatial resolutions, state and by port - two sets of multipliers
 # ---------------------------------------------------------------------------------------------------
 library(tidyverse)
 library(lubridate)
@@ -24,98 +25,77 @@ library(imputeTS)
 # ---------------------------------------------------------------------------------------------------
 
 remove(list = ls())
+setwd("C:/Users/Jennifer.Selgrath/Documents/research/R_projects/dsc_valuation/")
 # setwd("//aamb-s-clust01/Shared_Data/ONMS/Socioeconomic/California Work/CA Fish & Wildlife Data Agreement 2021/2021 Data Request/2021 CDFW Data Analysis/CDFW R Project 2021/CommercialTripTix/Data/")
 # setwd("C:/Users/jennifer.selgrath/Documents/research/R_projects/dsc_valuation/jacks_files_from_danielle/CommercialTripTix")
-setwd("C:/Users/Jennifer.Selgrath/Documents/research/R_projects/dsc_valuation/")
+
+
 
 # read fishing econ, dsc, io-pac, port data -----------------
-# ADJUST THIS INFO FOR BLOCK AND VMS ANALYSES
 d1 <- read_csv("./results/triptix_allCA3_io_pac.csv")%>%
-  select(-LandingReceiptNum,-LandingDate,-FisherID,-VesselID,-CDFWBlockID,-BlockName)%>%
+  select(-LandingReceiptNum,-LandingDate,-FisherID,-VesselID,-CDFWBlockID,-BlockName)%>%  # ADJUST THIS INFO FOR BLOCK AND VMS ANALYSES
   glimpse
 
+# --------------------------------------------------
+### 2020 commodity multiplier table 
+# --------------------------------------------------
+# updating column names with _m for multiplier
+comm_mults_2020 <- read.csv(file = "./data/IMPLAN/comm_mults_2020.csv")%>%
+  select(PortGroup_IOPAC=PortGroup_iopac,Name:TotEmp)%>% # Renaming PortGroup_IOPAC for consistency in join
+  select(c(PortGroup_IOPAC, COMMCD, Sector, # Selecting relevant columns
+           Vessel_output_m=Vessel_output, 
+           Vessel_income_m=Vessel_income, Vessel_employment_m=Vessel_employment,
+           Processor_output_m=Processor_output, Processor_income_m=Processor_income,
+           Processor_employment_m=Processor_employment, 
+           TotOut_m=TotOut, TotInc_m=TotInc, TotEmp_m=TotEmp))%>%
+  glimpse()
+
 
 # --------------------------------------------------
-# catch summary table
-### Summarizing catch by commodity multiplier groups (i.e. COMMCD)
+#   PORT LEVEL MULTIPLIERS
 # --------------------------------------------------
-fxn_commsector_catch1 <- function(dta,col_name){
+
+
+# --------------------------------------------------
+### Summarizing catch by port and commodity multiplier groups (i.e. COMMCD)
+# --------------------------------------------------
+fxn1_commsector_catch <- function(dta,col_name){
   colmn <- deparse(substitute(col_name))
   
   dta%>% 
     mutate(assoc=dta[[colmn]])%>%
     filter(year >= 2010) %>%
     drop_na(Value) %>%
-    group_by(PortGroup_IOPAC, COMMCD, COMMCD2,year,assoc) %>%  #LandingReceiptNum, LandingDate, FisherID, VesselID, ,PortName,SpeciesName,LandingReceiptNum
-    dplyr::summarise(revenue = sum(Value))
-  
-  # dta[[col_name]]<-col_name
+    group_by(PortGroup_IOPAC, COMMCD, COMMCD2,year,assoc) %>%  #LandingReceiptNum, LandingDate, FisherID, VesselID, PortName,SpeciesName,LandingReceiptNum
+    dplyr::summarise(
+      revenue = sum(Value))%>%
+    ungroup()%>%
+    group_by(PortGroup_IOPAC, COMMCD, COMMCD2,assoc) %>% 
+    complete(year = 2010:2020, fill = list(revenue = 0))%>%
+    ungroup()%>%
+    arrange(year,COMMCD2,PortGroup_IOPAC,assoc)%>%
+    left_join(comm_mults_2020, by = c("PortGroup_IOPAC", "COMMCD"))%>% # Joining tables - multipliers - port
+    glimpse()
 }
 
 # run fxn for three types of associations and all data ------------------
-
-# body length associations
-cc_bl<-fxn_commsector_catch1(d1,assoc_body_length2)%>%  
-  glimpse()
-
-
-# proximity associations
-cc_pr<-fxn_commsector_catch1(d1,assoc_proximity2)%>%  
-  glimpse()
-
-# habitat associations 
-cc_ha12<-fxn_commsector_catch1(d1,assoc_habitat2)%>% 
-  glimpse()
-
-# all
-cc_all<-  d1%>%
+cc_bl<-fxn1_commsector_catch(d1,assoc_body_length2)   # body length associations
+cc_pr<-fxn1_commsector_catch(d1,assoc_proximity2)     # proximity associations
+cc_ha12<-fxn1_commsector_catch(d1,assoc_habitat2)     # habitat associations 
+cc_all<-  d1%>%                                       # all species
   filter(year >= 2010) %>%
   drop_na(Value) %>%
-  mutate(assoc="allSp")%>% #assoc_all
+  mutate(assoc="allSp")%>% 
   group_by(PortGroup_IOPAC, COMMCD, COMMCD2,year,assoc) %>%  #LandingReceiptNum, LandingDate, FisherID, VesselID, 
-  dplyr::summarise(revenue = sum(Value))%>%
-  arrange(year,COMMCD2,PortGroup_IOPAC)%>%
+  dplyr::summarise(
+    revenue = sum(Value))%>%
+  ungroup()%>%
+  group_by(PortGroup_IOPAC, COMMCD, COMMCD2,assoc) %>% 
+  complete(year = 2010:2020, fill = list(revenue = 0))%>%
+  ungroup()%>%
+  arrange(year,COMMCD2,PortGroup_IOPAC,assoc)%>%
+  left_join(comm_mults_2020, by = c("PortGroup_IOPAC", "COMMCD"))%>% # Joining tables - multipliers - port
   glimpse()
-
-# commsector_catch <- commsector_catch %>% group_by(LandingReceiptNum, LandingDate, FisherID, VesselID, PortGroup_IOPAC, COMMCD) %>%
-#   complete(year = 2010:2020, fill = list(revenue = 0))
-
-# --------------------------------------------------
-### Linking 2020 commodity multiplier table to catch summary table
-# --------------------------------------------------
-
-# Reading in table
-comm_mults_2020 <- read.csv(file = "./data/IMPLAN/comm_mults_2020.csv")%>%
-  select(PortGroup_IOPAC=PortGroup_iopac,Name:TotEmp)%>% # Renaming PortGroup_IOPAC for consistency in join
-  select(c("PortGroup_IOPAC", "COMMCD", # Selecting relevant columns
-           "Sector", "Vessel_output",
-           "Vessel_income", "Vessel_employment",
-           "Processor_output", "Processor_income",
-           "Processor_employment", "TotOut",
-           "TotInc", "TotEmp"))%>%
-  glimpse()
-
-
-
-# will need to create separate tables for two spatial resolutions, state and by port
-
-# --------------------------------------------------
-# Joining tables - function - port
-#  HERE USING PORT MULTIPLIERS 
-# --------------------------------------------------
-fxn2_commsector_catch<-function(dta){
-  dta%>%
-    left_join(comm_mults_2020, by = c("PortGroup_IOPAC", "COMMCD"))%>%
-    glimpse()
-} 
-
-# run fxn for four types of associations ------------------
-
-# note: this has all data including values with no multipliers and port and state multipliers 
-cc2_bl<-fxn2_commsector_catch(cc_bl)
-cc2_pr<-fxn2_commsector_catch(cc_pr)
-cc2_ha12<-fxn2_commsector_catch(cc_ha12)
-cc2_all<-fxn2_commsector_catch(cc_all)
 
 
 # --------------------------------------------------
@@ -123,55 +103,88 @@ cc2_all<-fxn2_commsector_catch(cc_all)
 # PORT MULTIPLIERS
 # -------------------------------------------------
 # note originally columns that are removed below were overwritten instead of written to a column with a new name
-fxn_econ_contr<-function(dta){
+fxn1_econ_contr<-function(dta){
   dta %>%
-    mutate(Vessel_output2 = revenue*Vessel_output,
-           Vessel_income2 = revenue*Vessel_income,
-           Vessel_employment2 = revenue*Vessel_employment,
-           Processor_output2 = revenue*Processor_output,
-           Processor_income2 = revenue*Processor_income,
-           Processor_employment2 = revenue*Processor_employment,
-           TotOut2 = revenue*TotOut,
-           TotInc2 = revenue*TotInc,
-           TotEmp2 = revenue*TotEmp)%>%
-    # select(-Vessel_output,-Vessel_income,-Vessel_employment,-Processor_output,-Processor_income,-Processor_employment-TotOut,-TotInc,-TotEmp)%>%
+    mutate(Vessel_output_port = revenue*Vessel_output_m,
+           Vessel_income_port = revenue*Vessel_income_m,
+           Vessel_employment_port = revenue*Vessel_employment_m,
+           Processor_output_port = revenue*Processor_output_m,
+           Processor_income_port = revenue*Processor_income_m,
+           Processor_employment_port = revenue*Processor_employment_m,
+           TotOut_port = revenue*TotOut_m,
+           TotInc_port = revenue*TotInc_m,
+           TotEmp_port = revenue*TotEmp_m)%>%
+    select(-Vessel_output_m,-Vessel_income_m,-Vessel_employment_m,-Processor_output_m,-Processor_income_m,-Processor_employment_m,-TotOut_m,-TotInc_m,-TotEmp_m)%>% # remove multipliers
+    mutate(TotOut_port=if_else(revenue==0,0,TotOut_port))%>%
+    mutate(TotInc_port=if_else(revenue==0,0,TotInc_port))%>%
+    mutate(TotEmp_port=if_else(revenue==0,0,TotEmp_port))%>%
     glimpse()
 }
 
 
 # run function ----------------------
-cc3_port_bl<-fxn_econ_contr(cc2_bl)%>%glimpse()
-cc3_port_pr<-fxn_econ_contr(cc2_pr)
-cc3_port_ha12<-fxn_econ_contr(cc2_ha12)
-cc3_port_all<-fxn_econ_contr(cc2_all)
+cc3_port_bl<-fxn1_econ_contr(cc_bl)
+cc3_port_pr<-fxn1_econ_contr(cc_pr)
+cc3_port_ha12<-fxn1_econ_contr(cc_ha12)
+cc3_port_all<-fxn1_econ_contr(cc_all)
 
 
-# cc3_port_bl%>%filter(TotEmp>0)
 
+
+# --------------------------------------------------
+#   STATE LEVEL MULTIPLIERS
+# --------------------------------------------------
 
 
 # --------------------------------------------------
 ## Creating summary of economic contribution of landings for state of CA
 #  STATE MULTIPLIERS 
 # --------------------------------------------------
-
 # Aggregating revenue by year and commodity sector across all ports
-# Note: for CHNMS, all ports happen to be in CA
-fxn_commsector_catch3_ca<-function(dta){
-  dta%>%
-    group_by(COMMCD, COMMCD2,year,assoc) %>% #LandingReceiptNum, LandingDate, FisherID, VesselID, 
-    dplyr::summarise(revenue = sum(revenue, na.rm = T)) %>%
+fxn3_commsector_catch_ca<-function(dta,col_name){
+  colmn <- deparse(substitute(col_name))
+  
+  dta%>% 
+    mutate(assoc=dta[[colmn]])%>%
+    filter(year >= 2010) %>%
+    drop_na(Value) %>%
+    group_by(COMMCD, COMMCD2,year,assoc) %>%  #LandingReceiptNum, LandingDate, FisherID, VesselID, PortName,SpeciesName,LandingReceiptNum
+    dplyr::summarise(
+      revenue = sum(Value))%>%
+    ungroup()%>%
+    group_by(COMMCD, COMMCD2,assoc) %>% 
+    complete(year = 2010:2020, fill = list(revenue = 0))%>%
+    ungroup()%>%
     mutate(PortGroup_IOPAC = "California")%>% # rewrite all ports to CA to join state multipliers
-    left_join(comm_mults_2020, # Adding commodity multipliers to table
-              by = c("PortGroup_IOPAC", "COMMCD"))%>%
-    glimpse()  
+    arrange(year,COMMCD2,assoc)%>%
+    left_join(comm_mults_2020, by = c("PortGroup_IOPAC", "COMMCD"))%>% # Joining tables - multipliers - port
+    glimpse()
 }
 
+
 # run function
-cc3_ca_bl<-fxn_commsector_catch3_ca(cc2_bl)
-cc3_ca_pr<-fxn_commsector_catch3_ca(cc2_pr)
-cc3_ca_ha12<-fxn_commsector_catch3_ca(cc2_ha12)
-cc3_ca_all<-fxn_commsector_catch3_ca(cc2_all)
+cc3_ca_bl<-fxn3_commsector_catch_ca(d1,assoc_body_length2)   # body length associations
+cc3_ca_pr<-fxn3_commsector_catch_ca(d1,assoc_proximity2)     # proximity associations
+cc3_ca_ha12<-fxn3_commsector_catch_ca(d1,assoc_habitat2)     # habitat associations
+cc3_ca_all<-  d1%>%                                          # all species
+  filter(year >= 2010) %>%
+  drop_na(Value) %>%
+  mutate(assoc="allSp")%>% 
+  group_by(COMMCD, COMMCD2,year,assoc) %>%  #LandingReceiptNum, LandingDate, FisherID, VesselID, 
+  dplyr::summarise(
+    revenue = sum(Value))%>%
+  ungroup()%>%
+  group_by(COMMCD, COMMCD2,assoc) %>% 
+  complete(year = 2010:2020, fill = list(revenue = 0))%>%
+  ungroup()%>%
+  mutate(PortGroup_IOPAC = "California")%>% # rewrite all ports to CA to join state multipliers
+  arrange(year,COMMCD2,assoc)%>%
+  left_join(comm_mults_2020, by = c("PortGroup_IOPAC", "COMMCD"))%>% # Joining tables - multipliers - port
+  glimpse()
+
+
+
+
 
 
 # --------------------------------------------------
@@ -181,16 +194,19 @@ cc3_ca_all<-fxn_commsector_catch3_ca(cc2_all)
 # note originally columns that are removed below were overwritten instead of written to a column with a new name
 fxn_econcontr_results_CA <- function(dta){
   dta%>%
-    mutate(Vessel_output_CA = revenue*Vessel_output,
-           Vessel_income_CA = revenue*Vessel_income,
-           Vessel_employment_CA = revenue*Vessel_employment,
-           Processor_output_CA = revenue*Processor_output,
-           Processor_income_CA = revenue*Processor_income,
-           Processor_employment_CA = revenue*Processor_employment,
-           TotOut_CA = revenue*TotOut,
-           TotInc_CA = revenue*TotInc,
-           TotEmp_CA = revenue*TotEmp)%>%
-    select(-Vessel_output,-Vessel_income,-Vessel_employment,-Processor_output,-Processor_income,-Processor_employment,-TotOut,-TotInc,-TotEmp)%>%
+    mutate(Vessel_output_CA = revenue*Vessel_output_m,
+           Vessel_income_CA = revenue*Vessel_income_m,
+           Vessel_employment_CA = revenue*Vessel_employment_m,
+           Processor_output_CA = revenue*Processor_output_m,
+           Processor_income_CA = revenue*Processor_income_m,
+           Processor_employment_CA = revenue*Processor_employment_m,
+           TotOut_CA = revenue*TotOut_m,
+           TotInc_CA = revenue*TotInc_m,
+           TotEmp_CA = revenue*TotEmp_m)%>%
+    select(-Vessel_output_m,-Vessel_income_m,-Vessel_employment_m,-Processor_output_m,-Processor_income_m,-Processor_employment_m,-TotOut_m,-TotInc_m,-TotEmp_m)%>%
+    mutate(TotOut_CA=if_else(revenue==0,0,TotOut_CA))%>%
+    mutate(TotInc_CA=if_else(revenue==0,0,TotInc_CA))%>%
+    mutate(TotEmp_CA=if_else(revenue==0,0,TotEmp_CA))%>%
     glimpse()
 }
 
@@ -203,12 +219,12 @@ cc4_ca_all<-fxn_econcontr_results_CA(cc3_ca_all)
 
 
 # --------------------------------------------------
-# Computing economic contribution summary for all CA
+# Computing economic contribution summary for all CA, removing commodity information
 # STATE MULTIPLIERS
 # --------------------------------------------------
 fxn_econcontr_summary_CA <-function(dta){
   dta%>%
-    group_by(year,assoc) %>%
+    group_by(year,assoc,PortGroup_IOPAC) %>%
     dplyr::summarise(Revenue = sum(revenue, na.rm = T),
                      Vessel_output_CA2 = sum(Vessel_output_CA, na.rm = T),
                      Vessel_income_CA2 = sum(Vessel_income_CA, na.rm = T),
@@ -254,54 +270,55 @@ cc6_ca_all<-fxn_econcontr_CA_report   (cc5_ca_all)
 # --------------------------------------------------
 # Creating table for catch groups by port with no matching multipliers
 # --------------------------------------------------
-fxn_no_mult0<-function(dta){
+fxn1_no_mult<-function(dta){
   dta %>% 
-    filter(is.na(Vessel_output))%>%
-    select(PortGroup_IOPAC:assoc,Sector,revenue)%>%
+    filter(is.na(Vessel_output_port))%>%
+    select(year,PortGroup_IOPAC:assoc,Sector,revenue)%>%
     glimpse()
 }
 
-
 # run no multipliers fxn for four types of associations at port/commodity level ------------------
-nomults_port_bl   <- fxn_no_mult0(cc2_bl)
-nomults_port_pr   <- fxn_no_mult0(cc2_pr)
-nomults_port_ha12 <- fxn_no_mult0(cc2_ha12)
-nomults_port_all  <- fxn_no_mult0(cc2_all)
+nomults_port_bl   <- fxn1_no_mult(cc3_port_bl)
+nomults_port_pr   <- fxn1_no_mult(cc3_port_pr)
+nomults_port_ha12 <- fxn1_no_mult(cc3_port_ha12)
+nomults_port_all  <- fxn1_no_mult(cc3_port_all)
 
 
 # summarize catch no multipliers at state/commodity level ---------------------------------
-fxn_no_mult<-function(dta){
+fxn2_no_mult<-function(dta){
   dta %>% 
-    group_by(COMMCD, COMMCD2,year,assoc) %>% 
-    drop_na(revenue) %>%
-    dplyr::summarise(revenue2 = sum(revenue))%>% # revenue no mult
+    group_by(year,COMMCD, COMMCD2,assoc) %>% 
+    dplyr::summarise(
+      revenue_CA = sum(revenue))%>% # revenue no mult
     glimpse()
 }
 
 
 # run no multipliers fxn for four types of associations - summarizes at state/commodity level ------------------
-nomults_commodity_bl   <- fxn_no_mult(nomults_port_bl)
-nomults_commodity_pr   <- fxn_no_mult(nomults_port_pr)
-nomults_commodity_ha12 <- fxn_no_mult(nomults_port_ha12)
-nomults_commodity_all  <- fxn_no_mult(nomults_port_all)
+nomults_commodity_bl   <- fxn2_no_mult(nomults_port_bl)
+nomults_commodity_pr   <- fxn2_no_mult(nomults_port_pr)
+nomults_commodity_ha12 <- fxn2_no_mult(nomults_port_ha12)
+nomults_commodity_all  <- fxn2_no_mult(nomults_port_all)
 nomults_commodity_all
+
 
 # --------------------------------------------------
 # Summary of annual landings revenue without a corresponding multiplier
 # --------------------------------------------------
-fxn_no_mult2<-function(dta){
+fxn3_no_mult<-function(dta){
   dta%>% 
     group_by(year,assoc) %>%
-    dplyr::summarise(Revenue = round(sum(revenue),0))%>%
+    dplyr::summarise(
+      revenue_CA2 = round(sum(revenue),0))%>%
     glimpse()
 }
 
 # run no mult annual landings revenue fxn for four types of associations ------------------
 # no sector or no species
-nomults_annrev_bl     <- fxn_no_mult2(nomults_port_bl)
-nomults_annrev_pr     <- fxn_no_mult2(nomults_port_pr)
-nomults_annrev_ha12   <- fxn_no_mult2(nomults_port_ha12)
-nomults_annrev_all    <- fxn_no_mult2(nomults_port_all)
+nomults_annrev_bl     <- fxn3_no_mult(nomults_port_bl)
+nomults_annrev_pr     <- fxn3_no_mult(nomults_port_pr)
+nomults_annrev_ha12   <- fxn3_no_mult(nomults_port_ha12)
+nomults_annrev_all    <- fxn3_no_mult(nomults_port_all)
 nomults_annrev_all 
 
 # example of unmatched (no corresponding multiplier) category with high catch
@@ -344,10 +361,10 @@ write_csv(nomults_annrev_all, "./results/nomults_annrev_all.csv")
 #  MULTIPLIERS, VALUES NOT CALCULATED -----------------------------------------
 
 # results commercial sector catch with port multipliers
-write_csv(cc2_bl,"./results/revenue_bycommsector_wportmults_bl.csv")
-write_csv(cc2_pr,"./results/revenue_bycommsector_wportmults_pr.csv")
-write_csv(cc2_ha12,"./results/revenue_bycommsector_wportmults_ha12.csv")
-write_csv(cc2_all,"./results/revenue_bycommsector_wportmults_all.csv")
+write_csv(cc_bl,"./results/revenue_bycommsector_wportmults_bl.csv")
+write_csv(cc_pr,"./results/revenue_bycommsector_wportmults_pr.csv")
+write_csv(cc_ha12,"./results/revenue_bycommsector_wportmults_ha12.csv")
+write_csv(cc_all,"./results/revenue_bycommsector_wportmults_all.csv")
 
 # results commercial sector catch with CA multipliers
 write_csv(cc3_ca_bl,"./results/revenue_bycommsector_wCAmults_bl.csv")
