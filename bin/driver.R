@@ -30,9 +30,17 @@ source("./bin/landed_sp_2010_2020.R")
 #output:    ./results/fishtix_2010_2020.csv     # full dataset
 #           ./doc/fishtix_spp_2010_2020.csv # just list of landed species
 
+
+# add new species codes to species that did not have matches in IOPAC data - assigned these species to species that have similar life histories and catch patterns, so that they will be given multipliers in the code below
+# NEED TO UPDATE NAME. DO IF I HAVE TIME, BUT NOT A MAJOR STEP BECAUSE FEW SPP
+# source("./bin/landed_sp_update_codes.R")
+# input:  ./doc/fishtix_spp_2010_2020.csv
+# output: ./results/fishtix_spp_2010_2020_new_mult.csv
+
+
 # merge all sp landed with existing dsc data and assign missing values
 source("./bin/landed_sp_join_association_data.R")  
-# input:     ./doc/all_sp_2010_2020.csv
+# input:     ./results/fishtix_spp_2010_2020_new_mult.csv  # was: ./doc/all_sp_2010_2020.csv
 #           C:/Users/jennifer.selgrath/Documents/research/R_projects/dsc_associations_fishery/results/association_long.csv
 # output:   ./results/association_long_2010_2020.csv        # association data, just for species caught 2010-2020
     
@@ -119,7 +127,7 @@ source("./bin/join_data_2024.R")
 
 
 
-# probably can skip this
+# can skip this
 # merge commodity codes with details
 # source("./bin/commodity_codes.R")
 # input:
@@ -131,7 +139,7 @@ source("./bin/join_data_2024.R")
 
 
 # graph data --------------------------------------------------------
-source("./bin/graph_state_annual.R")
+source("./bin/graphs_state_annual.R")
 # input: ./results/ec_annual_all_long.csv
 # output:
 #  ./doc/graph_annual_prop.jpg
@@ -166,134 +174,26 @@ source("./bin/graphs_state_commodity.R")
 #         ./doc/graph_comm_ha12_o3.jpg                  # 3 = line, commodity colors
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# below is interm code from 2024
-
-
-
-
-# bind all datasets together so can calculate proportions for all three data subsets
-source("./bin/calculate_prop.R")
+# summary stats
+source("./bin/summary_stats.R")
 # input:  
-
-
-# output: 
-# ./results/val_port_sector.csv
-# ./results/val_port.csv
-# ./results/val_state_sector.csv
-# ./results/val_annual.csv
-
-
-# merge commodity codes with details
-source("./bin/commodity_codes.R")
-# input:
-# ./data/pacfin_species_codes.csv
-# ./data/pacfin_gear_codes.csv
-# ./results/ec_state_all_long.csv
-
-# output: ./results/ec_comm_all_long2.csv
-
-
-# graph data
-source("graph1b.R")
-# input:
-# ./results/ec_port_all_long.csv
-# ./results/ec_state_all_long.csv
-# ./results/ec_annual_all_long.csv
-
-# output:
-#  ./doc/graph_annual_prop.jpg
-#  ./doc/graph_annual.jpg
-# many...
+# output: ./doc/summary_stats_all_yr_state.csv
+#         ./doc/summary_stats_all_yr_port.csv
+#         
+#         
+#         
+#         
 
 
 
 
-
-
-
-
-
-
-
-# below is code from before I had JAck's full code
-
-
-
-# from jack's code - organize groups and species codes from cdfw commercial fisheries data
-# I combined groupings from different sanctuaries, but can change if needed. see old version of code for sanctary specific groups
-source("./bin/organize_cdfw_fisheries_data.R")
-# current version uses species groups for CHNMS
-# input:  ./results/triptix_inflation_2022.csv
-# output: ./results/trip_tix_ca_with_groups.csv
-#         ./results/species_ca.csv
-#         ./results/gear_ca.csv
-
-# organizing and joining fishticket and dsc associated data. includes year, value, quantity, etc
-source("./bin/join_fishtix_dsc.R")
-# input:  ./results/trip_tix_ca_with_groups.csv 
-#         ./results/association_long_2010_2020.csv
-# output: ./results/triptix_dsc.csv
-
-# add new species codes to species that did not have matches in IOPAC data - assigned these species to species that have similar life histories and catch patterns, so that they will be given multipliers in the code below
-source("./bin/fishtix_update_codes.R")
-# input:  ./results/triptix_dsc.csv
-# output: ./results/triptix_dsc2.csv
-
-# join triptix/dsc data with iopac codes and ports
-source("./bin/join_fishtix_dsc_iopac.R")
-# input:  ./results/triptix_dsc2.csv 
-#         ./data/IMPLAN/sp_key_iopac.csv
-#         ./data/IMPLAN/gear_key_iopac.csv
-#         ./data/portlist_allCA2.csv
-# output: ./results/triptix_dsc2.csv
-
-
+# old code - keep in case useful later
 # sub in codes for NAs in IMPLAN Data
-source("implan_codes_sub_missing.R")
+# source("implan_codes_sub_missing.R")
 # input:  ./results/fishtix_dsc_revenue_multipliers_port.csv
 #         ./results/fishtix_dsc_revenue_multipliers_ca.csv
 # output: 
 # 
-
-
-# join triptix/dsc data with implan multipliers and revenue values
-# both use 
-source("./bin/join_fishtix_dsc_implan.R")
-# input:  ./results/triptix_dsc2.csv
-#         ./data/IMPLAN/comm_mults_2020.csv
-# output: ./results/fishtix_dsc_revenue_multipliers_port.csv
-#         ./results/fishtix_dsc_revenue_multipliers_ca.csv 
-       
-
-# calculate income etc values from revenue and implan multipliers ------------------
-source("./bin/fishtix_dsc_implan_calc_values.R")
-# input: 
-# ./results/fishtix_dsc_revenue_multipliers_port.csv
-# ./results/fishtix_dsc_revenue_multipliers_ca.csv
-# output: 
-# ./doc/econcontributions_port_sector.csv   # econ value by year, Portgroup and COMMCD, port mult
-# ./doc/econcontributions_port.csv          # econ value by year, Portgroup, port mult
-# ./doc/econcontributions_ca_sector.csv     # econ value by year, COMMCD, state mult
-# ./doc/econcontributions_ca_ann.csv        # econ value by year, state mult
-# ./doc/revenue_nomults_port_sector.csv       # revenue by year, Portgroup and COMMCD, NO port mult
-# ./doc/revenue_nomults_port.csv              # revenue by year, Portgroup, NO port mult
-# ./doc/revenue_nomults_CA_sector.csv         # revenue by year, COMMCD, NO state mult
-# ./doc/revenue_nomults_CA.csv                # revenue by year, NO state mult
 
 
 

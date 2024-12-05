@@ -39,14 +39,14 @@ triptix <- read_csv("./results/triptix_allCA2.csv")%>%
 # loading  DSC associations from Jenny S. -----------------------------
 
 # original file moved to this project: "C:/Users/jennifer.selgrath/Documents/research/R_projects/dsc_associations_fishery/results/association_long.csv"
-dsc_sp <- read.csv("./data/dsc_fishery_association_long.csv")%>%
+dsc_sp <- read_csv("./results/association_long_2010_2020.csv")%>%#("./data/dsc_fishery_association_long.csv")%>%
   glimpse()
 
 dsc_sp%>%filter(species_id==198) # because 3 grenadier spp under one code it creates many to many join issues. select only one. they all have same associations
 
 # Selecting only "speciesID" and "assoc" vars
 dsc_sp_join <- dsc_sp %>% 
-  select(SpeciesID=species_id, assoc_body_length,assoc_proximity,assoc_habitat, assoc_body_length2,assoc_proximity2,assoc_habitat2,Group,habitat)%>%
+  select(SpeciesID=species_id, assoc_body_length,assoc_proximity,assoc_habitat, assoc_body_length2,assoc_proximity2,assoc_habitat2,SpeciesGroup, species_group2 ,habitat)%>%
   unique()%>% # filter out two grenadiers
   glimpse()
 

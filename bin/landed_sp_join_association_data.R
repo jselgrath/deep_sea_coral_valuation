@@ -20,8 +20,7 @@ remove(list=ls())
 setwd("C:/Users/jennifer.selgrath/Documents/research/R_projects/dsc_valuation/")
 
 # list of species caught 2010-2020
-d1<-read_csv("./doc/fishtix_spp_2010_2020.csv")%>%
-  mutate(species_id_orig=SpeciesID)%>%
+d1<-read_csv("./doc/fishtix_spp_2010_2020.csv")%>%# if update names I can use this other one: ("./results/fishtix_spp_2010_2020_new_mult.csv")%>%  # these are species with updated codes to match more implan codes
   glimpse()
 
 
@@ -34,7 +33,7 @@ d2%>%
 
 # merge - will include NAs where species are not 
 d4<-d1%>%
-  mutate(species_id=SpeciesID)%>%
+  mutate(species_id=SpeciesID)%>%   # change to SpeciesID_orig if update names for IMPLAN merge
   inner_join(d2)%>% # removes sp in dsc list (not caught 2010-2020) - does not keep algae, agar, freshwater spp, and other ones removed in analysis
   arrange(species_id)%>%
   # filter(species_id!= 953& species_id!= 951)%>% # remove algae and agar
@@ -43,9 +42,9 @@ d4<-d1%>%
 
 # check matching ----------------------------
 d4%>%
-  filter(species_id!=SpeciesID) # all match
-d4%>%
-  filter(species_id_orig!=SpeciesID) # all match
+  filter(species_id!=SpeciesID) # all match  (if change above, then these are the updated codes for IMPLAN)
+# d4%>%
+#   filter(SpeciesID_orig!=species_id) 
 
 
 # check for NAs ---------------------------------
