@@ -1,5 +1,6 @@
 # Jennifer Selgrath
 # NOAA CINMS
+# Deep sea coral valuation
 #
 # GOAL: graph port data
 # -----------------------------------------------
@@ -64,7 +65,7 @@ d1<-d1_ap%>%
          PortGroup_IOPAC=fct_reorder(PortGroup_IOPAC,port_order))%>%
   mutate(port_group=factor(port_group),
          port_group=fct_reorder(port_group,port_order))%>%
-  mutate(value2=ifelse(metric=="TotEmp_port",value,value_annual_1_mil))%>%
+  mutate(value2=if_else(metric=="TotEmp_port",value,value_annual_mil))%>%
   glimpse()
 d1
 
@@ -157,7 +158,7 @@ f1a<-function(dta,assoc){
     deets10+ #8
     facet_grid(rows=vars(port_group))+
     # facet_grid(port_group~Association)+
-    scale_y_continuous("Employment",limits=c(-5,2200),breaks=c(0,1000,2000))+
+    scale_y_continuous("Total Employment",limits=c(-5,2200),breaks=c(0,1000,2000))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -172,23 +173,37 @@ f1b<-function(dta,assoc){
     deets10+ 
     facet_grid(rows=vars(port_group))+
     # facet_grid(port_group~Association)+
-    scale_y_continuous("Total Employment",limits=c(-5,2000),breaks=c(0,1000,2000))+
+    scale_y_continuous("Total Employment",limits=c(-5,1550),breaks=c(0,750,1500))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
+# smooth graphs - assoc-----------------------------
+f1bb<-function(dta,assoc){
+  dta%>%
+    filter(assoc_type==assoc)%>%
+    ggplot(aes(x=year,y=value, color=Association))+ # Association
+    geom_smooth(size=1.2)+ #geom_area()+ #geom_smooth
+    scale_color_discrete_sequential(palette = "Batlow",nmax=4,order=(c(4:2)))+ 
+    geom_hline(yintercept=0,color="lightgrey")+
+    deets10+ 
+    facet_grid(rows=vars(port_group))+
+    # facet_grid(port_group~Association)+
+    scale_y_continuous("Total Employment",limits=c(-300,1550),breaks=c(0,750,1500))+
+    scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+}
 
 # line graphs - port -----------------------------
 f1c<-function(dta,assoc){
   dta%>%
     filter(assoc_type==assoc)%>%
     ggplot(aes(x=year,y=value, color=port_group))+ # Association
-    geom_line(size=1.2)+ #geom_area()+ #geom_smooth
+    geom_line(size=1.2,aes(linetype=Association))+#geom_area()+ #geom_smooth
     scale_color_discrete_sequential(palette = "TealGrn")+ #TealGrn
     geom_hline(yintercept=0,color="lightgrey")+
     deets8+
     facet_grid(port_group~Association)+
     # facet_wrap(vars(port_group), ncol=1)+
-    scale_y_continuous("Total Employment",limits=c(-5,2000),breaks=c(0,1000,2000))+
+    scale_y_continuous("Total Employment",limits=c(-5,1550),breaks=c(0,750,1500))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -198,6 +213,9 @@ ggsave("./doc/graph_port_pr_e1.jpg",height=8,width=5)
 
 f1b(dta=d1_be,assoc="pr") # port, assoc colors
 ggsave("./doc/graph_port_pr_e2.jpg",height=8,width=5)
+
+f1bb(dta=d1_be,assoc="pr") # port, assoc colors
+ggsave("./doc/graph_port_pr_e2_sm.jpg",height=8,width=5)
 
 f1c(dta=d1_be,assoc="pr") # port, port colors
 ggsave("./doc/graph_port_pr_e3.jpg",height=8,width=8)
@@ -209,6 +227,9 @@ ggsave("./doc/graph_port_ha12_e1.jpg",height=8,width=5)
 
 f1b(dta=d1_be,assoc="ha12") # port, assoc colors
 ggsave("./doc/graph_port_ha12_e2.jpg",height=8,width=5)
+
+f1bb(dta=d1_be,assoc="ha12") # port, assoc colors
+ggsave("./doc/graph_port_ha12_e2_sm.jpg",height=8,width=5)
 
 f1c(dta=d1_be,assoc="ha12") # port, port colors
 ggsave("./doc/graph_port_ha12_e3.jpg",height=8,width=8)
@@ -247,35 +268,51 @@ f4<-function(dta,assoc){
     deets10+ 
     facet_grid(rows=vars(port_group))+
     # facet_grid(port_group~Association)+
-    scale_y_continuous("Total Income (Mil)",limits=c(-5,120),breaks=c(0,60,120))+
+    scale_y_continuous("Total Income (Mil)",limits=c(-5,95),breaks=c(0,45,90))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
+# smooth graphs - assoc-----------------------------
+f4b<-function(dta,assoc){
+  dta%>%
+    filter(assoc_type==assoc)%>%
+    ggplot(aes(x=year,y=value_annual_mil, color=Association))+ # Association
+    geom_smooth(size=1.2)+ 
+    scale_color_discrete_sequential(palette = "Batlow",nmax=4,order=(c(4:2)))+ 
+    geom_hline(yintercept=0,color="lightgrey")+
+    deets10+ 
+    facet_grid(rows=vars(port_group))+
+    scale_y_continuous("Total Income (Mil)",limits=c(-30,105),breaks=c(0,50,110))+
+    scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+}
 
 # line graphs - port -----------------------------
 f5<-function(dta,assoc){
   dta%>%
     filter(assoc_type==assoc)%>%
     ggplot(aes(x=year,y=value_annual_mil, color=port_group))+ # Association
-    geom_line(size=1.2)+ #geom_area()+ #geom_smooth
+    geom_line(size=1.2,aes(linetype=Association))+
     scale_color_discrete_sequential(palette = "TealGrn")+ #TealGrn
     geom_hline(yintercept=0,color="lightgrey")+
     deets8+
     facet_grid(port_group~Association)+
     # facet_wrap(vars(port_group), ncol=1)+
-    scale_y_continuous("Total Income (Mil)",limits=c(-5,120),breaks=c(0,60,120))+
+    scale_y_continuous("Total Income (Mil)",limits=c(-5,95),breaks=c(0,45,90))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
 # proximity --------------
 f3(dta=d1_bi,assoc="pr") # Association
-ggsave("./doc/graph_port_pr_i1.jpg",height=8,width=5)
+ggsave("./doc/graph_port_pr_i1_ar.jpg",height=8,width=5)
 
 f4(dta=d1_bi,assoc="pr") # port, assoc colors
-ggsave("./doc/graph_port_pr_i2.jpg",height=8,width=5)
+ggsave("./doc/graph_port_pr_i2_ln.jpg",height=8,width=5)
+
+f4b(dta=d1_bi,assoc="pr") # port, assoc colors
+ggsave("./doc/graph_port_pr_i2_sm.jpg",height=8,width=5)
 
 f5(dta=d1_bi,assoc="pr") # port, port colors
-ggsave("./doc/graph_port_pr_i3.jpg",height=8,width=8)
+ggsave("./doc/graph_port_pr_i3_ln2.jpg",height=8,width=8)
 
 
 # habitat
@@ -284,6 +321,9 @@ ggsave("./doc/graph_port_ha12_i1.jpg",height=8,width=5)
 
 f4(dta=d1_bi,assoc="ha12") # port, assoc colors
 ggsave("./doc/graph_port_ha12_i2.jpg",height=8,width=5)
+
+f4b(dta=d1_bi,assoc="ha12") # port, assoc colors
+ggsave("./doc/graph_port_ha12_i2_sm.jpg",height=8,width=5)
 
 f5(dta=d1_bi,assoc="ha12") # port, port colors
 ggsave("./doc/graph_port_ha12_i3.jpg",height=8,width=8)
@@ -309,7 +349,7 @@ f6<-function(dta,assoc){
     deets10+ #8
     facet_grid(rows=vars(port_group))+
     # facet_grid(port_group~Association)+
-    scale_y_continuous("Total Output (Mil)",limits=c(-5,250),breaks=c(0,100,200))+
+    scale_y_continuous("Total Output (Mil)",limits=c(-5,220),breaks=c(0,100,200))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -318,13 +358,27 @@ f7<-function(dta,assoc){
   dta%>%
     filter(assoc_type==assoc)%>%
     ggplot(aes(x=year,y=value_annual_mil, color=Association))+ # Association
-    geom_line(size=1.2)+ #geom_area()+ #geom_smooth
+    geom_line(size=1.2)+
     scale_color_discrete_sequential(palette = "Batlow",nmax=4,order=(c(4:2)))+ 
     geom_hline(yintercept=0,color="lightgrey")+
     deets10+ 
     facet_grid(rows=vars(port_group))+
     # facet_grid(port_group~Association)+
-    scale_y_continuous("Total Output (Mil)",limits=c(-5,250),breaks=c(0,100,200))+
+    scale_y_continuous("Total Output (Mil)",limits=c(-5,160),breaks=c(0,75,150))+
+    scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
+}
+
+# smooth graphs - assoc-----------------------------
+f7b<-function(dta,assoc){
+  dta%>%
+    filter(assoc_type==assoc)%>%
+    ggplot(aes(x=year,y=value_annual_mil, color=Association))+ # Association
+    geom_smooth(size=1.2)+
+    scale_color_discrete_sequential(palette = "Batlow",nmax=4,order=(c(4:2)))+ 
+    geom_hline(yintercept=0,color="lightgrey")+
+    deets10+ 
+    facet_grid(rows=vars(port_group))+
+    scale_y_continuous("Total Output (Mil)",limits=c(-50,180),breaks=c(0,90,180))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -334,12 +388,12 @@ f8<-function(dta,assoc){
   dta%>%
     filter(assoc_type==assoc)%>%
     ggplot(aes(x=year,y=value_annual_mil, color=port_group))+ # Association
-    geom_line(size=1.2)+ #geom_area()+ #geom_smooth
+    geom_line(size=1.2,aes(linetype=Association))+
     scale_color_discrete_sequential(palette = "TealGrn")+ #TealGrn
     geom_hline(yintercept=0,color="lightgrey")+
     deets8+
     facet_grid(port_group~Association)+
-    scale_y_continuous("Total Output (Mil)",limits=c(-5,250),breaks=c(0,100,200))+
+    scale_y_continuous("Total Output (Mil)",limits=c(-5,160),breaks=c(0,75,150))+
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -349,6 +403,9 @@ ggsave("./doc/graph_port_pr_o1.jpg",height=8,width=5)
 
 f7(dta=d1_bo,assoc="pr") # port, assoc colors
 ggsave("./doc/graph_port_pr_o2.jpg",height=8,width=5)
+
+f7b(dta=d1_bo,assoc="pr") # port, assoc colors
+ggsave("./doc/graph_port_pr_o2_sm.jpg",height=8,width=5)
 
 f8(dta=d1_bo,assoc="pr") # port, port colors
 ggsave("./doc/graph_port_pr_o3.jpg",height=8,width=8)
@@ -360,6 +417,9 @@ ggsave("./doc/graph_port_ha12_o1.jpg",height=8,width=5)
 
 f7(dta=d1_bo,assoc="ha12") # port, assoc colors
 ggsave("./doc/graph_port_ha12_o2.jpg",height=8,width=5)
+
+f7b(dta=d1_bo,assoc="ha12") # port, assoc colors
+ggsave("./doc/graph_port_ha12_o2_sm.jpg",height=8,width=5)
 
 f8(dta=d1_bo,assoc="ha12") # port, port colors
 ggsave("./doc/graph_port_ha12_o3.jpg",height=8,width=8)

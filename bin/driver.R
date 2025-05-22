@@ -1,5 +1,6 @@
 # Jennifer Selgrath
 # NOAA CINMS
+# Deep sea coral valuation
 #
 # GOAL: Driver for Deep Sea Coral Valuation project
 #----------------------------------------------------------
@@ -16,6 +17,7 @@ setwd("C:/Users/Jennifer.Selgrath/Documents/research/R_projects/dsc_valuation/")
 
 # ------------------------------------------------------------------------------------------
 # Association Data ---------------------------------------------
+# manuscript for associations in review at Fish and Fisheries
 
 # associations ------------------------------------
 # bl = body length
@@ -29,6 +31,29 @@ source("./bin/landed_sp_2010_2020.R")
 #input:     Fishtix 2010-2020
 #output:    ./results/fishtix_2010_2020.csv     # full dataset
 #           ./doc/fishtix_spp_2010_2020.csv # just list of landed species
+
+
+# combine 1973-2024 fishticket data, pull species landed 2010-2024 to make species list
+source("./bin/landed_sp_1973_2024.R")
+#input:     Fishtix 1973 to 2024 - using copy in non-R data folder so only one copy on computer
+#output:    ./results/fishtix_1973_2024.csv
+#           ./doc/fishtix_spp_1973_2024.csv
+#           ./results/fishtix_1973_2024_no_pii.csv
+#           ./results/fishtix_2010_2024_no_pii.csv
+
+#remove freshwater species, algae, and roe - note th
+source("./bin/organize_fish_ticket_data1.R")
+#input:     ./results/fishtix_1973_2024_no_pii.csv
+#output:    ./results/fishtix_1973_2024_no_pii2.csv
+
+#subset years
+source("./bin/organize_fish_ticket_data2.R")
+#input:     ./results/fishtix_1973_2024_no_pii2.csv
+#output:    ./results/fishtix_no_pii_2010_2024.csv")
+#           ./results/fishtix_no_pii_1995_2024.csv")
+
+
+
 
 
 # add new species codes to species that did not have matches in IOPAC data - assigned these species to species that have similar life histories and catch patterns, so that they will be given multipliers in the code below
@@ -54,6 +79,7 @@ source("./bin/fishtix_econ_clean_gear_cat.R")
 # output:   ./results/triptix_allCA2.csv
 
 # join fishticket econ data with deep sea coral association data and io-pac data
+# io-pac - economic multipliers for ratios of how different businsses interact with each other. specific to pacific region, developed by NMFS
 source("./bin/fishtix_econ_join_dsc_iopac.R")
 # input:    ./results/triptix_allCA2.csv
 #           ./data/dsc_fishery_association_long.csv
