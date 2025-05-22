@@ -182,6 +182,39 @@ deets10<-theme_bw() + #
         legend.text=element_text(size=rel(1.1)),
         # legend.position=c(.8,.25),
         legend.background = element_rect(colour='white'),
+<<<<<<< HEAD
+=======
+        strip.text = element_text(size=rel(1.3)))
+
+# deets10<-theme_bw() + # legend inside, white box
+#   theme(panel.grid.minor=element_blank(), 
+#         panel.grid.major=element_blank(),
+#         panel.background=element_rect(fill=NA),
+#         panel.border=element_rect(fill=NA),
+#         axis.title = element_text(size=rel(1.3),colour="black", lineheight=.8), 
+#         axis.text = element_text(size=rel(1.2), lineheight=.8,  colour="black"),
+#         axis.title.y=element_text(vjust=1,lineheight=.8),
+#         axis.title.x=element_text(vjust=.5), 
+#         legend.title=element_text(size=rel(1.2)),
+#         legend.text=element_text(size=rel(1.1)),
+#         legend.position=c(.83,.43),
+#         legend.background = element_rect(fill="white", colour = "black"),
+#         strip.text.y = element_text(size=rel(1.3)))
+
+#############################
+# No legend # , no x text
+deets11<-theme_bw() + 
+  theme(panel.grid.minor=element_blank(), 
+        panel.grid.major=element_blank(),
+        panel.background=element_rect(fill=NA),
+        panel.border=element_rect(fill=NA),
+        axis.title = element_text(size=rel(1.4),colour="black", lineheight=.8),
+        axis.text = element_text(size=rel(1.3), lineheight=.8),
+        axis.text.x = element_text(hjust=1, angle = 45,  colour="white"),
+        axis.title.y=element_text(vjust=1,lineheight=.8),
+        axis.title.x=element_text(vjust=.5), 
+        legend.position="none",
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
         strip.text = element_text(size=rel(1.3)))
 
 # deets10<-theme_bw() + # legend inside, white box

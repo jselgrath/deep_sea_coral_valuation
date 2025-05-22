@@ -33,6 +33,7 @@ source("./bin/landed_sp_2010_2020.R")
 #           ./doc/fishtix_spp_2010_2020.csv # just list of landed species
 
 
+<<<<<<< HEAD
 # combine 1973-2024 fishticket data, pull species landed 2010-2024 to make species list
 source("./bin/landed_sp_1973_2024.R")
 #input:     Fishtix 1973 to 2024 - using copy in non-R data folder so only one copy on computer
@@ -56,6 +57,8 @@ source("./bin/organize_fish_ticket_data2.R")
 
 
 
+=======
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
 # add new species codes to species that did not have matches in IOPAC data - assigned these species to species that have similar life histories and catch patterns, so that they will be given multipliers in the code below
 # NEED TO UPDATE NAME. DO IF I HAVE TIME, BUT NOT A MAJOR STEP BECAUSE FEW SPP
 # source("./bin/landed_sp_update_codes.R")

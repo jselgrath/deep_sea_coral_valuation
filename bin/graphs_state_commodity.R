@@ -222,7 +222,11 @@ ggplot(aes(x=year,y=value_commodity_mil, color=Commodity))+
   scale_y_continuous("Income (Million USD)", limits=c(-1,150),breaks=c(0,75,150))+
   scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 
+<<<<<<< HEAD
 ggsave("./doc/graph_comm_inc_1m_pr.jpg",height=25,width=15)
+=======
+ggsave("./doc/graph_comm_inc_1m_pr.jpg",height=30,width=20)
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
 
 
 # --------------------------------------------------------------
@@ -242,7 +246,11 @@ f1e<-function(dta,assoc){
     deets9+ #8
     facet_wrap(vars(Commodity), ncol=3)+
     # facet_grid(rows = vars(COMMCD2))+ #facet_grid(COMMCD2~Association)+
+<<<<<<< HEAD
     scale_y_continuous("Total Employment", limits=c(-1,2200),breaks=c(0,1000,2000))+
+=======
+    scale_y_continuous("Total Employment", limits=c(-1,2100),breaks=c(0,1000,2000))+
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -257,7 +265,11 @@ f2e<-function(dta,assoc){
     deets8+ #8
     facet_wrap(vars(Commodity), ncol=3)+
     # facet_grid(rows = vars(COMMCD2))+ #facet_grid(COMMCD2~Association)+
+<<<<<<< HEAD
     scale_y_continuous("Total Employment", limits=c(-1,2200),breaks=c(0,1000,2000))+
+=======
+    scale_y_continuous("Total Employment", limits=c(-1,2100),breaks=c(0,1000,2000))+
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -316,7 +328,11 @@ f1i<-function(dta,assoc){
     deets9+ #8
     facet_wrap(vars(Commodity), ncol=3)+
     # facet_grid(rows = vars(COMMCD2))+ #     facet_grid(COMMCD2~Association)+
+<<<<<<< HEAD
     scale_y_continuous("Total Income (Mil)", limits=c(-1,175),breaks=c(0,75,150))+
+=======
+    scale_y_continuous("Total Income (Mil)", limits=c(-1,150),breaks=c(0,75,150))+
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
@@ -331,7 +347,11 @@ f2i<-function(dta,assoc){
     deets8+ #8
     facet_wrap(vars(Commodity), ncol=3)+
     # facet_grid(rows = vars(COMMCD2))+ #     facet_grid(COMMCD2~Association)+
+<<<<<<< HEAD
     scale_y_continuous("Total Income (Mil)", limits=c(-1,175),breaks=c(0,75,150))+
+=======
+    scale_y_continuous("Total Income (Mil)", limits=c(-1,150),breaks=c(0,75,150))+
+>>>>>>> 029957e2e0149682e23a84a356c1015965f5a99f
     scale_x_continuous("Year",limits=c(2010,2020),breaks=c(2010,2015,2020))
 }
 
