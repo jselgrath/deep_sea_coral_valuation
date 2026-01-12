@@ -33,7 +33,6 @@ source("./bin/landed_sp_2010_2020.R")
 #           ./doc/fishtix_spp_2010_2020.csv # just list of landed species
 
 
-<<<<<<< HEAD
 # combine 1973-2024 fishticket data, pull species landed 2010-2024 to make species list
 source("./bin/landed_sp_1973_2024.R")
 #input:     Fishtix 1973 to 2024 - using copy in non-R data folder so only one copy on computer
