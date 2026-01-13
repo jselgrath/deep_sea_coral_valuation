@@ -6,12 +6,13 @@
 #----------------------------------------------------------
 library(tidyverse); library(ggplot2)
 
+
 # github: https://github.com/jselgrath/deep_sea_coral_valuation
+# fishticket data here: C:/Users/jennifer.selgrath/Documents/research/r_data/cdfw_fishticket/MLDS_2025 and on kiteworks
 
 #----------------------------------------------------------
 remove(list=ls())
-setwd("C:/Users/Jennifer.Selgrath/Documents/research/R_projects/dsc_valuation/")
-
+setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
 # LINKING Deep Sea Coral and Fisheries Data ------------------------
 
@@ -26,11 +27,11 @@ setwd("C:/Users/Jennifer.Selgrath/Documents/research/R_projects/dsc_valuation/")
 # ha2 =  definitely associated with depth and habitat
 # all = all species
 
-# combine 2010-2020 fishticket data, pull species landed 2010-2020 to make species list
-source("./bin/landed_sp_2010_2020.R")
-#input:     Fishtix 2010-2020
-#output:    ./results/fishtix_2010_2020.csv     # full dataset
-#           ./doc/fishtix_spp_2010_2020.csv # just list of landed species
+# # combine 2010-2024 fishticket data, pull species landed 2010-2024 to make species list
+# source("./bin/landed_sp_2010_2024.R")
+# #input:     Fishtix 2010-2020
+# #output:    ./results/fishtix_2010_2024.csv     # full dataset
+# #           ./doc/fishtix_spp_2010_2024.csv # just list of landed species
 
 
 # combine 1973-2024 fishticket data, pull species landed 2010-2024 to make species list

@@ -9,8 +9,10 @@ library(tidyverse)
 
 # ---------------------------------------------------
 remove(list=ls())
+# setwd("C:/Users/jennifer.selgrath/Documents/research/r_data/cdfw_fishticket") # data only folder - other option
 setwd("C:/Users/jennifer.selgrath/Documents/research/data/cdfw_2025/MLDS/")
 list.files("C:/Users/jennifer.selgrath/Documents/research/data/cdfw_2025/MLDS/")
+
 
 # original project - 2010 - 2020
 d0<-read_csv("./MLR Data Extract_2010.csv")%>%
@@ -181,6 +183,7 @@ d24<-read_csv("./MLR Data Extract_2024.csv")%>%
   glimpse()
 
 # combine 
+# val study only 2010-2024
 d40<-rbind(d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d21,d22,d23,d24)%>%
   glimpse()
 unique(d40$year)
@@ -206,16 +209,28 @@ d50<-rbind(d40,d41,d42,d43,d44)%>%
   glimpse()
 unique(d50$year)
 
-# estimate of unique spp from all years (2073-2020) - includes freshwater, roe, algae
+
+
+
+# estimate of unique spp from all years (2073-2024) - includes freshwater, roe, algae
 length(unique(d50$SpeciesID))%>% 
   glimpse() # 395
 
+
+# ---------------
 # estimate of unique spp from all years (2010-2024) - includes freshwater, roe, algae
 length(unique(d40$SpeciesID))%>% 
   glimpse() # 344
 
 # unique names and IDs for all species
 d51<-d50%>%
+  select(SpeciesID,SpeciesName)%>%
+  unique()%>%
+  arrange(SpeciesID)%>%
+  glimpse()
+
+# unique names and IDs for all species
+d40b<-d40%>%
   select(SpeciesID,SpeciesName)%>%
   unique()%>%
   arrange(SpeciesID)%>%
@@ -232,9 +247,14 @@ d54<-d40%>%
   
 
 # save
-setwd("C:/Users/Jennifer.Selgrath/Documents/research/R_projects/dsc_valuation/")
+setwd("C:/Users/jennifer.selgrath/Documents/research/r_results/dsc_val_fishticket") 
+
 
 write_csv(d50,"./results/fishtix_1973_2024.csv")
-write_csv(d51,"./doc/fishtix_spp_1973_2024.csv")
 write_csv(d53,"./results/fishtix_no_pii_1973_2024.csv")
+write_csv(d54,"./results/fishtix_no_pii_2010_2024.csv")
 
+# wd to google drive for summarized data - this should mirror 
+setwd("G:/My Drive/research/r_projects/dsc_valuation")
+write_csv(d51,"./doc/fishtix_spp_1973_2024.csv")
+write_csv(d40b,"./doc/fishtix_spp_2010_2024.csv")
