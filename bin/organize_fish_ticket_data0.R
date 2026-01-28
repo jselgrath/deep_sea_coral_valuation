@@ -188,18 +188,22 @@ d40<-rbind(d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d21,d22,d23,d24)%>%
   glimpse()
 unique(d40$year)
 
+#00s
 d41<-rbind(d00,d11,d12,d13,d14,d15,d16,d17,d18,d19)%>%
   glimpse()
 unique(d41$year)
 
+# 90s
 d42<-rbind(d90,d91,d92,d93,d94,d95,d96,d97,d98,d99)%>%
   glimpse()
 unique(d42$year)
 
+# 80s
 d43<-rbind(d80,d81,d82,d83,d84,d85,d86,d87,d88,d89)%>%
   glimpse()
 unique(d43$year)
 
+# 70s
 d44<-rbind(d73,d74,d75,d76,d77,d78,d79)%>%
   glimpse()
 unique(d44$year)
@@ -222,14 +226,14 @@ length(unique(d50$SpeciesID))%>%
 length(unique(d40$SpeciesID))%>% 
   glimpse() # 344
 
-# unique names and IDs for all species
+# unique names and IDs for all species (2073-2024)
 d51<-d50%>%
   select(SpeciesID,SpeciesName)%>%
   unique()%>%
   arrange(SpeciesID)%>%
   glimpse()
 
-# unique names and IDs for all species
+# unique names and IDs for all species (2010-2024) 
 d40b<-d40%>%
   select(SpeciesID,SpeciesName)%>%
   unique()%>%
@@ -238,11 +242,11 @@ d40b<-d40%>%
 
 # remove_pii -------------------------
 d53<-d50%>%
-  select(-FisherID,-ALDSFisherName,-ETixFisherName,-BusinessID,-FishBusinessName)%>%
+  select(-FisherID,-ALDSFisherName,-ETixFisherName,-BusinessID,-FishBusinessName,-VesselID,-ALDSVesselName,-EtixVesselName)%>%
   glimpse()
 
-d54<-d40%>%
-  select(-FisherID,-ALDSFisherName,-ETixFisherName,-BusinessID,-FishBusinessName)%>%
+d44<-d40%>%
+  select(-FisherID,-ALDSFisherName,-ETixFisherName,-BusinessID,-FishBusinessName,-VesselID,-ALDSVesselName,-EtixVesselName)%>%
   glimpse()
   
 
@@ -251,10 +255,10 @@ setwd("C:/Users/jennifer.selgrath/Documents/research/r_results/dsc_val_fishticke
 
 
 write_csv(d50,"./results/fishtix_1973_2024.csv")
-write_csv(d53,"./results/fishtix_no_pii_1973_2024.csv")
-write_csv(d54,"./results/fishtix_no_pii_2010_2024.csv")
+write_csv(d53,"./results/fishtix_1973_2024_no_pii.csv")
+write_csv(d44,"./results/fishtix_2010_2024_no_pii.csv")
 
 # wd to google drive for summarized data - this should mirror 
 setwd("G:/My Drive/research/r_projects/dsc_valuation")
-write_csv(d51,"./doc/fishtix_spp_1973_2024.csv")
+write_csv(d51, "./doc/fishtix_spp_1973_2024.csv")
 write_csv(d40b,"./doc/fishtix_spp_2010_2024.csv")

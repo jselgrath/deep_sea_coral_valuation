@@ -2,36 +2,67 @@
 # NOAA CINMS
 # Deep Sea Coral Valuation
 
-# goal: subset data for valuation analysis & for recent analysis (post 1994 as advised by CDFW due to change in fishing blocks - see emails notes in google drive):
+# goal: update counts of species with updated dataset
 
-# text from email: "older data before 2000 does include use of 4-digit block codes.  Outreach occurred between 1992 and 1993, communicating the importance for fishermen to provide the most accurate location using 3-digit block codes for the catch as the 4-digit block codes represented larger catch areas (see attached Southern CA block chart). "
+# association variable details ----------------------
+# ------------------------------------------------------------
+# body length
+# proximity
+# habitat & depth
+# --------------------------------------------------------------
 
-# note: have not checked if freshwater species, roe, and algae list captures all species codes for all species from older data - should check if this becomes relevant
 
 # ---------------------------------------------------
 library(tidyverse)
 
 # ---------------------------------------------------
 remove(list=ls())
-setwd("C:/Users/jennifer.selgrath/Documents/research/R_projects/dsc_valuation/")
+setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
-# ---------------------------------------
-# all years fisheries data, no freshwater, algae, roe or PII
-d1<-read_csv("./results/fishtix_1973_2024_no_pii2.csv")%>% 
-  mutate(species_id=SpeciesID,species_name=SpeciesName)%>%
+# list of species caught 2010-2024
+d1<-read_csv("./results/fishtix_spp_2010_2024_no_fresh.csv")%>% # if update names I can use this other one: ("./results/fishtix_spp_2010_2020_new_mult.csv")%>%  # these are species with updated codes to match more implan codes
+  mutate(species_id=SpeciesID)%>%   # change to SpeciesID_orig if update names for IMPLAN merge
+  select(-species_name)%>%
+  # unique()%>%
   glimpse()
 
-# filter for 2010 and after
-d2<-d1%>%
-  filter(year>=2010)%>%
+#load dsc-marine life association dataset (2024)
+d2 <- read.csv("./data/association_long2.csv")%>% 
+  select(-new,-ref,-Group)%>%
   glimpse()
 
-# filter for 1994 and after
-d3<-d1%>%
-  filter(year>=1994)%>%
+d1%>%
+  filter(species_id==198) # 3 grenadier spp have 1 species_id (198)
+
+
+# what species are not in list?
+d4b<-d1%>%
+  anti_join(d2)%>% # removes sp in dsc list (not caught 2010-2020) - does not keep algae, agar, freshwater spp, and other ones removed in analysis
+  arrange(species_id)%>%
   glimpse()
 
+unique(d4b$species_id) # note: # 2010 included: "Anchovy  deepbody", "Eulachon", "Salmon  coho", "Seabass  totuava", "Limpet  unspecified", "Scallop  rock", "Oyster  giant Pacific", "Oyster  european flat" - but totuava not landed in CA. these are 7 extra spp.
 
-# -----------------
-write_csv(d2,"./results/fishtix_no_pii_2010_2024.csv")
-write_csv(d3,"./results/fishtix_no_pii_1995_2024.csv")
+# check matching ----------------------------
+d4b%>%
+  filter(species_id!=SpeciesID) # all match  (if change above, then these are the updated codes for IMPLAN)
+
+# what species are in list?
+d4<-d1%>%
+  inner_join(d2)%>% # removes sp in dsc list (not caught 2010-2020) - does not keep algae, agar, freshwater spp, and other ones removed in analysis
+  arrange(species_id)%>%
+  glimpse()
+
+# check for NAs ---------------------------------
+d4%>%filter(is.na(adjacent))%>%
+  print(n=80) #0
+
+d4%>%filter(is.na(general_prox))%>%
+  print(n=80) #0
+
+d4%>%filter(is.na(habitat_depth))%>%
+  print(n=50) #0
+
+
+# save
+write_csv(d4,"./results/association_long_2010_2024.csv")

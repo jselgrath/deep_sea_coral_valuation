@@ -3,7 +3,7 @@
 # jan 2024
 # project: value for deep sea coral associated species caught by commercial fisheries
 
-# goal: identify species that do not have multipliers and assign similiar species codes
+# goal: identify species that do not have multipliers and assign similar species codes
 
 # -------------------------------------------------------------------------------
 ## References - i-o multipliers ----------------------
@@ -16,16 +16,19 @@ library(tidyverse); library(lubridate);
 # library(Kendall); library(zoo); library(imputeTS); library(stringr)
 # ----------------------------------------------------------
 remove(list=ls())
+# setwd("C:/Users/jennifer.selgrath/Documents/research/r_results/dsc_val_fishticket") 
+setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
-d0<-read_csv("./doc/fishtix_spp_2010_2020.csv")%>%
-  mutate(SpeciesID_orig=SpeciesID)%>% # save original number
-  mutate(SpeciesName_orig=SpeciesName)%>% # save original number
+
+d0<-read_csv("./doc/fishtix_spp_2010_2024.csv")%>%
+  mutate(species_id_orig=SpeciesID)%>% # save original number
+  mutate(species_name_orig=SpeciesName)%>% # save original number
   glimpse
 
 # swithed number to get list of species names below
 d0%>%
-  filter(SpeciesID_orig==146)%>%
-  select(SpeciesID_orig,SpeciesName_orig)
+  filter(species_id_orig==146)%>%
+  select(species_id_orig,species_name_orig)
 
 # these were identified when further through code via what did not match
 # unmatched species - dsc assoc - info
@@ -44,32 +47,37 @@ d0%>%
 # 480 Sargo - 0 - perch - https://www.pierfishing.com/sargo/
 # 689 Flatworm  marine - NA - only 3 records
 # 760 Sponges - NA
-# 851 ???
+# 851 Themiste - peanut worm
 # 999 Fish  unspecified - NA
 
 # assigning unmatched species to close species, with similar depth and catch patterns----------------------
 d1<-d0%>%
-  mutate(SpeciesID_orig=SpeciesID)%>% # save original number
-  mutate(SpeciesName_orig=SpeciesName)%>% # save original number
-  mutate(SpeciesID=if_else(SpeciesID==15,55, #Escolar > species_name = Mackerel jack
-                           if_else(SpeciesName=="Escolar","Mackerel jack",
-          if_else(SpeciesID==144,559, #Senorita > species_name =  Surfperch pile
-                  if_else(SpeciesName=="Senorita","Surfperch pile",
+  mutate(species_id_orig=SpeciesID)%>% # save original number
+  mutate(species_name_orig=SpeciesName)%>% # save original number
+
+  mutate(SpeciesName=if_else(SpeciesName=="Escolar","Mackerel jack",SpeciesName))%>%
+  mutate(SpeciesName=if_else(SpeciesName=="Senorita","Surfperch pile",SpeciesName))%>%
+  mutate(SpeciesName=if_else(SpeciesName=="Wrasse rock","Surfperch pile",SpeciesName))%>%
+  
+  mutate(SpeciesID=if_else(SpeciesID==15,55, SpeciesID))%>%#Escolar > species_name = Mackerel jack
+  mutate(SpeciesID=if_else(SpeciesID==144,559, #Senorita > species_name =  Surfperch pile
            if_else(SpeciesID==146,559, # rock wrasse > species_name =  Surfperch  pile
-                   if_else(SpeciesName=="Wrasse  rock","Surfperch pile",
-             # if_else(SpeciesID==306,,  # not in data?             
-              # if_else(SpeciesID==340,, # not in data?
+             # if_else(SpeciesID==306,,  # not in data? - roe removed
+             #  if_else(SpeciesID==340,, # not in data? - Tilapia - should be removed
                 if_else(SpeciesID==467,481, # opah > Dolphinfish
                   if_else(SpeciesID==473,483, #lizardfish > longjaw mudsucker
                     if_else(SpeciesID==475,559, # > Surfperch pile
                       if_else(SpeciesID==478,559, # > Surfperch pile
                        if_else(SpeciesID==479,559, # > Surfperch pile
-                        if_else(SpeciesID==480,559, # > Surfperch pile
+                        if_else(SpeciesID==480,559,SpeciesID)))))))))%>% # > Surfperch pile
                          # if_else(SpeciesID==689,, # not in data?
                           # if_else(SpeciesID==760,, # not in data?
                           #  if_else(SpeciesID==851,, # not in data?
-                            if_else(SpeciesID==999,655,SpeciesID)))))))))))%>% #> Rockfish copper
+                            # if_else(SpeciesID==999,655,SpeciesID))))))))))))))%>% #> Rockfish copper
   glimpse()
+  
+  filter (d1%>%
+            filter(SpeciesID==306))
 
 
 # save --------------
