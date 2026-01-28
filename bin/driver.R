@@ -10,35 +10,53 @@ library(tidyverse); library(ggplot2)
 # github: https://github.com/jselgrath/deep_sea_coral_valuation
 
 # fishticket data here: C:/Users/jennifer.selgrath/Documents/research/r_data/cdfw_fishticket/MLDS_2025 and on kiteworks
-
+# saving fisheies raw data to folder: r_results
 #----------------------------------------------------------
 remove(list=ls())
 setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
-# LINKING Deep Sea Coral and Fisheries Data ------------------------
 
-# IMPLAN MULTIPLIERS -----------------------
+
+
+# IMPLAN MULTIPLIERS - using 2023 values -----------------------
+
+
+# fill in missing codes to link cdfw and iopac species groups and codes
+source("./bin/iopac_to_cdfw.R")
+# input:    ./data/iopac_sp_key.csv # this file from Jack
+# output:   ./results/iopac_cdfw_sp_key2.csv
+
 
 # load IOPAC multipliers from NOAA NWFSC r package
 # code from here: https://github.com/allen-chen-noaa-gov/IOPAC_pub
-# data folder to run package from Allen Chen via email
+# data folder to run package from Allen Chen via email - this pulls the multipliers from iopac/implan
 source("./bin/iopac_multipliers1.R")
 #input:     "G:/My Drive/research/r_projects/dsc_valuation", "IOPAC_pub"
 #output:    ./results/multipliers_2023.csv
 
+
 # subset CA and california port multipliers for project
-source("./bin/iopac_multipliers1.R")
+source("./bin/iopac_multipliers2.R")
 #imput:     ./results/multipliers_2023.csv
 #output:    ./results/multipliers_2023_ca.csv
 #           ./results/multipliers_2023_port.csv
+
+# fill in missing multipliers based on mean values of species, gear, port, and or state
+source("./bin/iopac_multipliers3.R")
+# input:    ./data/commsector_wCAmults
+#           ./data/commsector_wportmults
+# output:   ./results/multipliers_2020_ca.csv
+#           ./results/multipliers_2020_port.csv
+
+
 
 
 
 # FISHTICKET DATA ------------------------------
 
-# combine 1973-2024 fish ticket data, and pull species landed 2010-2024 to make species list
-source("./bin/organize_landed_sp_1973_2024.R")
-#input:     Fishtix 1973 to 2024 - using copy in non-R data folder so only one copy on computer
+# combine 1973-2024 fish ticket data, and make species list. subset to project years
+source("./bin/organize_fish_ticket_data0.R")
+#input:     Fishtix 1973 to 2024 - using copy in non-R data folder so only one copy on computer. eg: ./MLR Data Extract_2010.csv
 #output:    ./results/fishtix_1973_2024.csv
 #           ./results/fishtix_1973_2024_no_pii.csv
 #           ./results/fishtix_2010_2024_no_pii.csv
@@ -46,23 +64,23 @@ source("./bin/organize_landed_sp_1973_2024.R")
 #           ./doc/fishtix_spp_1973_2024.csv
 #           ./doc/fishtix_spp_2010_2024.csv
 
-
 #remove freshwater species, algae, and roe
 source("./bin/organize_fish_ticket_data1.R")
-#input:     ./results/fishtix_1973_2024_no_pii.csv
+#input:     ./data/dsc_val_associations_freshwater3.csv #gdrive - different from last paper because spp from all years
+#           ./doc/fishtix_spp_2010_2024.csv             #gdrive
+#           ./results/fishtix_1973_2024_no_pii.csv
 #           ./results/fishtix_2010_2024_no_pii.csv
-#           ./data/dsc_val_associations_freshwater3.csv #gdrive
-#           ./doc/fishtix_spp_2010_2024.csv
 #output:    ./results/fishtix_1973_2024_no_pii2.csv
 #           ./results/fishtix_2010_2024_no_pii2.csv
 #           ./results/fishtix_spp_2010_2024_no_fresh.csv
 
 
-# ------------------------------------------------------------------------------------------
-# Association Data ---------------------------------------------
+
+
+# ASSOCIATION DATA ---------------------------------------------
+
+
 # manuscript for associations published: selgrath et al (2025) Fish and Fisheries.
-
-
 # associations ------------------------------------
 # bl = body length
 # pr = proximity
@@ -71,31 +89,13 @@ source("./bin/organize_fish_ticket_data1.R")
 # all = all species
 
 
-
-
-# merge all sp landed with existing deep sea coral data and assign missing values
+# remove algae, agar, freshwater spp from association lists, limit to study years
 source("./bin/organize_fish_ticket_data2.R")  
 # input:     ./results/fishtix_spp_2010_2024_no_fresh.csv                
-#            ./data/association_long2.csv
+#            ./data/association_long2.csv                                # v2 includes additional spp for 2010
 # output:    ./results/association_long_2010_2024.csv                    # association data, just for species caught 2010-2024
 
 
-
-# fill in missing multipliers based on mean values of species, gear, port, and or state
-# fill in based on mean for port or for the state
-source("./bin/organize_fish_ticket_data3.R")
-# input:    ./data/commsector_wCAmults
-#           ./data/commsector_wportmults
-# output:   ./results/multipliers_2020_ca.csv
-#           ./results/multipliers_2020_port.csv
-
-
-
-# add new species codes to species that did not have matches in IOPAC data - assigned these species to species that have similar life histories and catch patterns, so that they will be given multipliers in the code below
-# NEED TO UPDATE NAME. DO IF I HAVE TIME, BUT NOT A MAJOR STEP BECAUSE FEW SPP
-# source("./bin/landed_sp_update_codes.R")
-# input:  ./doc/fishtix_spp_2010_2020.csv
-# output: ./results/fishtix_spp_2010_2020_new_mult.csv
 
 
 

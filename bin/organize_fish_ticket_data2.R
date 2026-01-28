@@ -2,10 +2,11 @@
 # NOAA CINMS
 # Deep Sea Coral Valuation
 
-# goal: update counts of species with updated dataset
+# goal: remove algae, agar, freshwater spp from association lists
 
+# --------------------------------------------------------------
 # association variable details ----------------------
-# ------------------------------------------------------------
+
 # body length
 # proximity
 # habitat & depth
@@ -26,7 +27,7 @@ d1<-read_csv("./results/fishtix_spp_2010_2024_no_fresh.csv")%>% # if update name
   # unique()%>%
   glimpse()
 
-#load dsc-marine life association dataset (2024)
+#load dsc-marine life association dataset 
 d2 <- read.csv("./data/association_long2.csv")%>% 
   select(-new,-ref,-Group)%>%
   glimpse()

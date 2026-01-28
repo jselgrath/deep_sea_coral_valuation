@@ -18,8 +18,10 @@ c1<-read_csv("./data/commod_dat.csv")%>%
   glimpse()
 
 c2<-read_csv("./data/species_dat.csv")%>%
-  select(id_species=ID,SPID:SP_SUM)%>%
+  # select(id_species_pf=ID,SPID:SP_SUM)%>% # id is not cdfw ID # pf = pacfin
   glimpse()
+
+view(c2)
 
 c3<-read_csv("./data/gear_dat.csv")%>%
   select(id_gear=ID,GEAR,gear_name=DESCRIPTION,GEAR_SUM)%>%
