@@ -9,27 +9,22 @@ library(tidyverse); library(ggplot2)
 
 # github: https://github.com/jselgrath/deep_sea_coral_valuation
 
+
 # fishticket data here: C:/Users/jennifer.selgrath/Documents/research/r_data/cdfw_fishticket/MLDS_2025 and on kiteworks
 # saving fisheies raw data to folder: r_results
+
 #----------------------------------------------------------
 remove(list=ls())
 setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
 
-
-
 # IMPLAN MULTIPLIERS - using 2023 values -----------------------
-
-
-# fill in missing codes to link cdfw and iopac species groups and codes
-source("./bin/iopac_to_cdfw.R")
-# input:    ./data/iopac_sp_key.csv # this file from Jack
-# output:   ./results/iopac_cdfw_sp_key2.csv
 
 
 # load IOPAC multipliers from NOAA NWFSC r package
 # code from here: https://github.com/allen-chen-noaa-gov/IOPAC_pub
 # data folder to run package from Allen Chen via email - this pulls the multipliers from iopac/implan
+# io-pac - economic multipliers for ratios of how different businsses interact with each other. specific to pacific region, developed by NMFS
 source("./bin/iopac_multipliers1.R")
 #input:     "G:/My Drive/research/r_projects/dsc_valuation", "IOPAC_pub"
 #output:    ./results/multipliers_2023.csv
@@ -41,12 +36,12 @@ source("./bin/iopac_multipliers2.R")
 #output:    ./results/multipliers_2023_ca.csv
 #           ./results/multipliers_2023_port.csv
 
-# fill in missing multipliers based on mean values of species, gear, port, and or state
+# fill in missing multipliers based on mean values of species, gear, port, and/or state
 source("./bin/iopac_multipliers3.R")
-# input:    ./data/commsector_wCAmults
-#           ./data/commsector_wportmults
-# output:   ./results/multipliers_2020_ca.csv
-#           ./results/multipliers_2020_port.csv
+# input:    ./results/multipliers_2023_ca.csv
+#           ./results/multipliers_2023_port.csv
+# output:   ./results/multipliers_2023_ca2.csv
+#           ./results/multipliers_2023_port2.csv
 
 
 
@@ -98,25 +93,77 @@ source("./bin/organize_fish_ticket_data2.R")
 
 
 
+# ---------------------------------------------------
+# ORGANIZE CODES TO JOIN WITH IOPAC DATA
+
+
+# link cdfw and iopac species groups and codes
+source("./bin/iopac_to_cdfw_species.R")
+# input:    ./data/species_translations_pacfin.csv
+#           ./data/species_translations_pacfin2.csv
+#           ./data/species_key_cdfw.csv # key with cdfw to pacfin codes from chris free - see his website
+#           ./data/species_dat.csv # pacfin & iopac groups from allen chen - see email
+#           ./results/association_long_2010_2024.csv # association data from selgrath et al 2025
+# output:   ./results/species_key_final.csv
+
+
+# link cdfw and iopac gear groups and codes
+source("./bin/iopac_to_cdfw_gear.R")
+# input:    ./data/gear_key_iopac.csv
+#           ./data/gear_key_cdfw.csv  # key with cdfw to pacfin codes from chris free
+#           ./data/gear_dat.csv
+# output:   ./results/gear_key_final.csv
+
+
+
+# link cdfw and iopac port groups and codes. pacfin data from pfmc
+source("./bin/iopac_to_cdfw_ports.R")
+# input:    ./data/port_translations_pacfin.csv
+#           ./data/port_translations_pacfin2.csv
+#           ./data/portlist_allCA3.csv # from ONMS and IOPAC tech memo, fixed 2 errors
+#           ./data/port_key_cdfw.csv # from chris free: https://chrismfree.com/california-fisheries-data/ca-fishing-port-codes/
+#           ./data/pacfin_port_complex_names.csv
+# output:   ./results/port_key_final.csv
+
+
+
+
+
+# ---------------------------------------------------
+# join fish ticket at association and species/gear key data, make commondity codes
+source("./bin/organize_fish_ticket_data3.R")
+# input:    ./results/fishtix_2010_2024_no_pii2.csv
+#           ./results/species_key_final.csv
+#           ./results/gear_key_final.csv
+# output:   ./results/fishtix_2010_2024_no_pii3.csv
+
+
+
+# join fish ticket at association and port key data
+source("./bin/organize_fish_ticket_data4.R")
+# input:    ./results/fishtix_2010_2024_no_pii3.csv
+#           ./data/portlist_allCA3.csv
+#           ./data/portcomplex_code_pacfin2
+# output:   ./results/fishtix_2010_2024_no_pii4.csv
+#           ./results/port_key_final.csv
+
+
+# join iopac multipliers to fishtix data
+source("./bin/organize_fish_ticket_data5.R")
+# input:    ./results/fishtix_2010_2024_no_pii4.csv
+#           ./results/multipliers_2023_ca2.csv
+#           ./results/multipliers_2023_port2.csv
+# output:   
+#           
+
+
+
+
 
 
 # ------------------------------------------------------------------------------------------
 # Fisheries data with economic outputs - code adapted from Jack ----------------------------
 
-# clean fisheries economic data and make gear codes manually from tech report table
-source("./bin/organize_econ_clean_gear_cat.R")
-# input:    ./results/fishtix_2010_2024_no_pii2.csv
-# output:   ./results/fishtix_2010_2024_no_pii3.csv
-
-# join fishticket econ data with deep sea coral association data and io-pac data
-# io-pac - economic multipliers for ratios of how different businsses interact with each other. specific to pacific region, developed by NMFS
-source(".bin/organize_iopac_sp_gear_port.R")
-# input:    ./results/fishtix_2010_2024_no_pii3.csv
-#           ./data/dsc_fishery_association_long.csv
-#           ./data/iopac_sp_key.csv
-#           ./data/iopac_gear_key.csv
-#           ./data/portlist_allCA3.csv
-# output:   ./results/fishtix_2010_2024_no_pii4.csv
 
 # summarize econ and iopac data by dsc association types
 source("./bin/fishtix_econ_dsc_summarize.R")

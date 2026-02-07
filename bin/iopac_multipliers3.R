@@ -1,8 +1,7 @@
 # Jennifer Selgrath
 # NOAA CINMS
 # Deep sea coral valuation
-
-# GOAL: Estimate IO-PAC multiplier values for COMMCD and ports for missing values. Multipliers are 2020 values.  
+# GOAL: Estimate IO-PAC multiplier values for commcd and ports for missing values. Multipliers are 2020 values.  
 
 #----------------------------------------------------------
 library(tidyverse)
@@ -12,23 +11,21 @@ remove(list=ls())
 setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
 # state level multipliers
-dz<- read_csv("./data/commsector_wCAmults.csv")%>% 
-  select(-revenue,-year)%>%
+d1<- read_csv("./results/multipliers_2023_ca.csv")%>% # old: #"./data/commsector_wCAmults.csv" (remove year, revenue)
   unique()%>%
   glimpse()
 
 # port level multipliers
-d<- read_csv("./data/commsector_wportmults.csv")%>% 
-  select(-revenue,-year)%>%
+d2<- read_csv("./results/multipliers_2023_port.csv")%>% # old: commsector_wportmults (remove year, revenue)
   unique()%>%
   glimpse()
 
-head(dz)
+head(d2)
 
 # List of columns to process
 target_cols <- c("Vessel_output", "Vessel_income", "Vessel_employment", 
                  "Processor_output", "Processor_income", "Processor_employment", 
-                 "TotOut", "TotInc")
+                 "TotOut", "TotInc", "TotEmp")
 
 # Pre-calculate global mean
 global_means <- colMeans(d1[, target_cols], na.rm = TRUE) # ca mult
@@ -40,8 +37,8 @@ global_means2 <- colMeans(d2[, target_cols], na.rm = TRUE) # port mult
 df_updated1 <- d1 %>%
   # 1. Extract codes
   mutate(
-    species_code = str_sub(COMMCD, 1, 3),
-    gear_code = str_sub(COMMCD, 4, -1)
+    species_code = str_sub(commcd, 1, 3),
+    gear_code = str_sub(commcd, 4, -1)
   ) %>%
   # 2. Calculate the different grouping means
   group_by(species_code, gear_code) %>%
@@ -86,7 +83,7 @@ df_updated1 <- d1 %>%
   glimpse()
 
 # Check a sample of the new columns
-df_updated1 %>% select(COMMCD, ends_with("2")) %>% 
+df_updated1 %>% select(commcd, ends_with("2")) %>% 
   head()
 
 # View results
@@ -118,13 +115,13 @@ df_updated1 %>%
 df_updated2 <- d2 %>%
   # 1. Extract codes
   mutate(
-    species_code = str_sub(COMMCD, 1, 3),
-    gear_code = str_sub(COMMCD, 4, -1)
+    species_code = str_sub(commcd, 1, 3),
+    gear_code = str_sub(commcd, 4, -1)
   ) %>%
   
   # 2. Calculate grouping means at every level
   # Level A: Port + Species + Gear
-  group_by(PortGroup_IOPAC, species_code, gear_code) %>%
+  group_by(Region, species_code, gear_code) %>%
   mutate(across(all_of(target_cols), ~mean(.x, na.rm = TRUE), .names = "psg_mean_{.col}")) %>%
   ungroup() %>%
   
@@ -178,7 +175,7 @@ df_updated2 <- d2 %>%
 
 
 # Check a sample of the new columns
-df_updated2 %>% select(PortGroup_IOPAC,COMMCD, ends_with("2")) %>% 
+df_updated2 %>% select(Region,commcd, ends_with("2")) %>% 
   head()
 
 # View results
@@ -192,5 +189,5 @@ test2<-df_updated2%>%
   glimpse()
 
 # save ---------------
-write_csv(df_updated1,"./results/multipliers_2020_ca.csv")
-write_csv(df_updated2,"./results/multipliers_2020_port.csv")
+write_csv(df_updated1,"./results/multipliers_2023_ca2.csv")
+write_csv(df_updated2,"./results/multipliers_2023_port2.csv")

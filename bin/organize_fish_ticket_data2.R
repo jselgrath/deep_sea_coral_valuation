@@ -2,7 +2,7 @@
 # NOAA CINMS
 # Deep Sea Coral Valuation
 
-# goal: remove algae, agar, freshwater spp from association lists
+# goal: remove freshwater spp, algae, agar, kelp, roe from association lists
 
 # --------------------------------------------------------------
 # association variable details ----------------------
@@ -38,7 +38,7 @@ d1%>%
 
 # what species are not in list?
 d4b<-d1%>%
-  anti_join(d2)%>% # removes sp in dsc list (not caught 2010-2020) - does not keep algae, agar, freshwater spp, and other ones removed in analysis
+  anti_join(d2)%>% # removes sp in dsc list (not caught 2010-2024) - does not keep algae, agar, freshwater spp, and other ones removed in analysis
   arrange(species_id)%>%
   glimpse()
 
