@@ -16,14 +16,16 @@ setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
 # ---------------------------------------
 #freshwater assoc data 
-d0<-read_csv("./data/dsc_val_associations_freshwater3.csv")%>% # has codes 1973-2024 (note older ones added manually, not included in published version from selgrath 2025.) 
+# has codes 1973-2024 (note older ones added manually, not included in published version from selgrath 2025.) 
+d0<-read_csv("./data/dsc_val_associations_freshwater3.csv")%>% 
+  mutate(cdfw_species_id=species_id)%>%
   glimpse()
 
 # fisheries data - -------------------
 setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
 d1b<-read_csv("./doc/fishtix_spp_2010_2024.csv")%>%
-  mutate(species_id=SpeciesID,species_name=SpeciesName)%>%
+  mutate(cdfw_species_id=SpeciesID,cdfw_species_name=SpeciesName)%>%
   unique()%>%
   glimpse()
 
@@ -31,13 +33,11 @@ d1b<-read_csv("./doc/fishtix_spp_2010_2024.csv")%>%
 setwd("C:/Users/jennifer.selgrath/Documents/research/r_results/dsc_val_fishticket")
 
 # all years fisheries data
-d1<-read_csv("./results/fishtix_1973_2024_no_pii.csv")%>% 
-  mutate(species_id=SpeciesID,species_name=SpeciesName)%>%
+d1<-read_csv("./results/fishtix_1973_2024_no_pii1.csv")%>% 
   glimpse()
 
 # dsc years fisheries data
-d1a<-read_csv("./results/fishtix_2010_2024_no_pii.csv")%>% 
-  mutate(species_id=SpeciesID,species_name=SpeciesName)%>%
+d1a<-read_csv("./results/fishtix_2010_2024_no_pii1.csv")%>% 
   unique()%>%
   glimpse()
 
@@ -50,15 +50,15 @@ d2b<-d0%>%
   filter(freshwater==0)%>%
   select(-freshwater)%>%
   # remove algae
-  filter(species_name!="Agar"& species_name!="Algae marine" & species_name!="Kelp giant")%>%
+  filter(cdfw_species_name!="Agar"& cdfw_species_name!="Algae marine" & cdfw_species_name!="Kelp giant")%>%
   #remove roe
-  filter(species_name!="Herring Pacific - roe"& species_name!="Herring Pacific - roe on kelp"&  species_name!="Salmon Roe (Chinook Coho)" )%>%
-  filter(species_id!=306 & species_id!= 953 & species_id!= 951& species_id!= 950& species_id!= 122 & species_id!= 995 & species_id!= 410)%>% #410 is totauba - not landed in CA
+  filter(cdfw_species_name!="Herring Pacific - roe"& cdfw_species_name!="Herring Pacific - roe on kelp"&  cdfw_species_name!="Salmon Roe (Chinook Coho)" )%>%
+  filter(cdfw_species_id!=306 & cdfw_species_id!= 953 & cdfw_species_id!= 951& cdfw_species_id!= 950& cdfw_species_id!= 122 & cdfw_species_id!= 995 & cdfw_species_id!= 410)%>% #410 is totauba - not landed in CA
   unique()%>%
-  # for figuring out what is joining
+  select(-SpeciesID,-SpeciesName)%>%
   glimpse()
   
-unique(d2b$species_id)
+unique(d2b$cdfw_species_id)
 
 # all years -------------
 #remove freshwater spp, algae, roe
@@ -67,15 +67,14 @@ d2<-d0%>%
     filter(freshwater==0)%>%
     select(-freshwater)%>%
   # remove algae
-  filter(species_name!="Agar"& species_name!="Algae marine" & species_name!="Kelp giant")%>%
+  filter(cdfw_species_name!="Agar"& cdfw_species_name!="Algae marine" & cdfw_species_name!="Kelp giant")%>%
   #remove roe
-  filter(species_name!="Herring Pacific - roe"& species_name!="Herring Pacific - roe on kelp"&  species_name!="Salmon Roe (Chinook Coho)" )%>%
-  filter(species_id!=306 & species_id!= 953 & species_id!= 951& species_id!= 950& species_id!= 122 & species_id!= 995& species_id!= 410)%>%
-  # for figuring out what is joining
+  filter(cdfw_species_name!="Herring Pacific - roe"& cdfw_species_name!="Herring Pacific - roe on kelp"&  cdfw_species_name!="Salmon Roe (Chinook Coho)" )%>%
+  filter(cdfw_species_id!=306 & cdfw_species_id!= 953 & cdfw_species_id!= 951& cdfw_species_id!= 950& cdfw_species_id!= 122 & cdfw_species_id!= 995& cdfw_species_id!= 410)%>%
   glimpse()
 
 # check 
-d2%>%filter(species_name=="Grenadier")%>%
+d2%>%filter(cdfw_species_name=="Grenadier")%>%
   glimpse() # species id = 198 (3 species with same code FYI)
 
 # dsc years -------------
@@ -85,15 +84,14 @@ d2a<-d0%>%
   filter(freshwater==0)%>%
   select(-freshwater)%>%
   # remove algae
-  filter(species_name!="Agar"& species_name!="Algae marine" & species_name!="Kelp giant")%>%
+  filter(cdfw_species_name!="Agar"& cdfw_species_name!="Algae marine" & cdfw_species_name!="Kelp giant")%>%
   #remove roe
-  filter(species_name!="Herring Pacific - roe"& species_name!="Herring Pacific - roe on kelp"&  species_name!="Salmon Roe (Chinook Coho)" )%>%
-  filter(species_id!=306 & species_id!= 953 & species_id!= 951& species_id!= 950& species_id!= 122 & species_id!= 995& species_id!= 410)%>%
-  # for figuring out what is joining
+  filter(cdfw_species_name!="Herring Pacific - roe"& cdfw_species_name!="Herring Pacific - roe on kelp"&  cdfw_species_name!="Salmon Roe (Chinook Coho)" )%>%
+  filter(cdfw_species_id!=306 & cdfw_species_id!= 953 & cdfw_species_id!= 951& cdfw_species_id!= 950& cdfw_species_id!= 122 & cdfw_species_id!= 995& cdfw_species_id!= 410)%>%
   glimpse()
 
 # check 
-d2a%>%filter(species_name=="Grenadier")%>%
+d2a%>%filter(cdfw_species_name=="Grenadier")%>%
   glimpse() # species id = 198 (3 species with same code FYI)
 
 
@@ -101,7 +99,7 @@ d2a%>%filter(species_name=="Grenadier")%>%
 
 
 # -----------------
-write_csv(d2,"./results/fishtix_1973_2024_no_pii2.csv")
+write_csv(d2,"./results/fishtix_1973_2024_no_pii2.csv") 
 write_csv(d2a,"./results/fishtix_2010_2024_no_pii2.csv")
 
 setwd("G:/My Drive/research/r_projects/dsc_valuation")

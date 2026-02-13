@@ -2,7 +2,7 @@
 # NOAA CINMS
 # Deep sea coral valuation
 #
-# GOAL: build commondity codes
+# GOAL: build commodity codes
 #----------------------------------------------------------
 library(tidyverse); library(ggplot2)
 
@@ -13,12 +13,12 @@ library(tidyverse); library(ggplot2)
 #----------------------------------------------------------
 remove(list=ls())
 
-# fishtix wd
+# set new wd 
 setwd("C:/Users/jennifer.selgrath/Documents/research/r_results/dsc_val_fishticket")
+
 
 # fishing data -----------------
 d1a <- read_csv("./results/fishtix_2010_2024_no_pii2.csv")%>% # of v3? check
-  select(cdfw_species_id=species_id,cdfw_species_name=species_name,cdfw_port_id=PortID,cdfw_port_name=PortName,cdfw_block_id=CDFWBlockID, cdfw_black_name=BlockName,cdfw_gear_id=GearID,cdfw_gear_name=GearName,LandingReceiptNum:BlockName,Quantity:year)%>%
   glimpse()
 
 # add shrimp ID for commodity codes below
@@ -39,30 +39,37 @@ d3<-read_csv("./results/gear_key_final.csv")%>% glimpse()
 # Joining dsc species codes and associations  with triptix -----------------------
 # LEFT JOIN TO EXCLUDE SPECIES NOT CONSIDERED, INCLUDING INLAND SPECIES AND ALGAE AND ROE
 d4 <- d1%>%
-  left_join(d2, by = "cdfw_species_id",relationship = "many-to-many")%>%
+  left_join(d2, relationship = "many-to-many")%>%
+  select(-species_id)%>%
   glimpse()
 
 # join gear codes with triptix --------------------
-# update TWL to TWS for pacfin_gear_group1 - will need to update name later
 d5<-d4%>%
   select(-cdfw_gear_name)%>% # do don not have duplicate values
   left_join(d3,by="cdfw_gear_id",relationship = "many-to-many")%>%
-  mutate(pacfin_gear_group1=if_else(shrimp_prawn==1&pacfin_gear_group1=="TWL","TWS",pacfin_gear_group1))%>%
-  mutate(pacfin_gear_group1_id=if_else(shrimp_prawn==1&pacfin_gear_group1_id==8,9,pacfin_gear_group1_id))%>%
-  mutate(pacfin_gear_group1_name=if_else(shrimp_prawn==1&pacfin_gear_group1_name=="Trawls except shrimp trawls","Shrimp trawls",pacfin_gear_group1_name))%>%
   glimpse()
+glimpse(d5)
 
-# check
+unique(d5$pacfin_gear_group_code)
+
+# check 
+# not all shrimp are captured in TWS but does not matter for this project because iopac = TW for all
 d5%>%
 filter(shrimp_prawn==1)%>%
-  select(cdfw_species_name,cdfw_port_name,cdfw_gear_name,shrimp_prawn,pacfin_gear_group1,pacfin_gear_group1_id,pacfin_gear_group1_name)
+  select(cdfw_species_name,cdfw_port_name,cdfw_gear_name,shrimp_prawn,pacfin_gear_group_code,iopac_gear_group)
 
 
 # build commodity codes --------------------------------------
 d6<-d5%>%
-  mutate(COMMCD =paste0(pacfin_species_group_id, pacfin_gear_group))%>% # Concatenating SP_SUM (pacfin_group_id) and GEAR_SUM to create variable with commodity multiplier codes
-  mutate(COMMCD2 =paste(pacfin_species_group_id, pacfin_gear_group,sep="_"))%>%
+  mutate(iopac_commcd =paste0(iopac_species_group_code, iopac_gear_group))%>% # Concatenating SP_SUM (pacfin_group_id) and GEAR_SUM to create variable with commodity multiplier codes
+  mutate(COMMCD3 =paste0(iopac_species_group_code, pacfin_gear_group_code))%>%
   glimpse()
+
+# what species are not assigned a pacfin species group
+d6%>%
+  filter(is.na(iopac_species_group_code))%>%
+  select(cdfw_species_id,cdfw_species_name,pacfin_gear_group_code)%>%
+  unique()
 
 # save
 setwd("C:/Users/jennifer.selgrath/Documents/research/r_results/dsc_val_fishticket")
@@ -88,4 +95,4 @@ write_csv(d6,"./results/fishtix_2010_2024_no_pii3.csv")
 #                                                                                                          ifelse(GearID %in% c(0), "Unspecified",
 #                                                                                                                 ifelse(GearID %in% c(10,16,17,19,20,23:26,28,
 #                                                                                                                                      36,41,42,72,80,90,91,95), "AllOther", "")))))))))))))))%>% glimpse()
-  glimpse()
+  # glimpse()

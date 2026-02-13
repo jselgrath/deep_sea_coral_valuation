@@ -42,7 +42,8 @@ source("./bin/iopac_multipliers3.R")
 #           ./results/multipliers_2023_port.csv
 # output:   ./results/multipliers_2023_ca2.csv
 #           ./results/multipliers_2023_port2.csv
-
+#           ./results/multipliers_2023_ca3.csv      - 3 = version with only filled in multipliers
+#           ./results/multipliers_2023_port3.csv    - 3 = version with only filled in multipliers
 
 
 
@@ -59,11 +60,18 @@ source("./bin/organize_fish_ticket_data0.R")
 #           ./doc/fishtix_spp_1973_2024.csv
 #           ./doc/fishtix_spp_2010_2024.csv
 
+# standardize column names for fishtix data
+source("organize_fish_ticket_data0b.R")
+#input:     ./results/fishtix_1973_2024_no_pii.csv
+#output:    ./results/fishtix_1973_2024_no_pii1.csv
+#           ./results/fishtix_1973_2024_no_pii1.csv
+
+
 #remove freshwater species, algae, and roe
 source("./bin/organize_fish_ticket_data1.R")
 #input:     ./data/dsc_val_associations_freshwater3.csv #gdrive - different from last paper because spp from all years
 #           ./doc/fishtix_spp_2010_2024.csv             #gdrive
-#           ./results/fishtix_1973_2024_no_pii.csv
+#           ./results/fishtix_1973_2024_no_pii1.csv
 #           ./results/fishtix_2010_2024_no_pii.csv
 #output:    ./results/fishtix_1973_2024_no_pii2.csv
 #           ./results/fishtix_2010_2024_no_pii2.csv
@@ -116,6 +124,7 @@ source("./bin/iopac_to_cdfw_gear.R")
 
 
 
+
 # link cdfw and iopac port groups and codes. pacfin data from pfmc
 source("./bin/iopac_to_cdfw_ports.R")
 # input:    ./data/port_translations_pacfin.csv
@@ -130,7 +139,7 @@ source("./bin/iopac_to_cdfw_ports.R")
 
 
 # ---------------------------------------------------
-# join fish ticket at association and species/gear key data, make commondity codes
+# join fish ticket at association and species/gear key data, make commodity codes
 source("./bin/organize_fish_ticket_data3.R")
 # input:    ./results/fishtix_2010_2024_no_pii2.csv
 #           ./results/species_key_final.csv
@@ -142,58 +151,104 @@ source("./bin/organize_fish_ticket_data3.R")
 # join fish ticket at association and port key data
 source("./bin/organize_fish_ticket_data4.R")
 # input:    ./results/fishtix_2010_2024_no_pii3.csv
-#           ./data/portlist_allCA3.csv
-#           ./data/portcomplex_code_pacfin2
-# output:   ./results/fishtix_2010_2024_no_pii4.csv
 #           ./results/port_key_final.csv
+# output:   ./results/fishtix_2010_2024_no_pii4.csv
+
 
 
 # join iopac multipliers to fishtix data
 source("./bin/organize_fish_ticket_data5.R")
 # input:    ./results/fishtix_2010_2024_no_pii4.csv
-#           ./results/multipliers_2023_ca2.csv
-#           ./results/multipliers_2023_port2.csv
-# output:   
+#           ./results/multipliers_2023_ca3.csv
+#           ./results/multipliers_2023_port3.csv
+# output:   ./results/fishtix_2010_2024_no_pii5.csv
+
+
+
+# calulate NA summaries for paper and appendix
+source("./bin/organize_fish_ticket_data5_summarize.R")
+# input:    ./results/fishtix_2010_2024_no_pii5.csv
+# output:   ./doc/na_in_commcd_sum.csv")
+#           ./doc/na_in_commcd.csv
+
+# clean commodity code descriptions                                # fit in if decide need
+# source("./bin/commodity_codes_clean.R")
+# input:     ./results/fishtix_2010_2024_no_pii5_ca.csv
+# output:    ./results/fishtix_2010_2024_no_pii5a_ca.csv
+        
+
+# join calculate state and port multipliers ---------------------------------------------------
+# Fisheries data with economic outputs 
+source("./bin/organize_fish_ticket_data6.R") # adapted from ./bin/fishtix_econ_dsc_summarize.R
+# input:    ./results/fishtix_2010_2024_no_pii7_ca.csv")%>%
+#           ./results/fishtix_2010_2024_no_pii7_port.csv
+# output:   files below ..........
+
+# port revenue no multipliers --------------------------------------------------
+#           ./results/nomults_port_adj.csv
+#           ./results/nomults_port_gp.csv
+#           ./results/nomults_port_ha12.csv
+#           ./results/nomults_port_all.csv
+
+# commodity/state revenue no multipliers --------------------------------------------------
+#           ./results/nomults_commodity_adj.csv
+#           ./results/nomults_commodity_gp.csv
+#           ./results/nomults_commodity_ha12.csv
+#           ./results/nomults_commodity_all.csv
+
+# annual revenue no multipliers --------------------------------------------------
+#           ./results/nomults_annrev_adj.csv
+#           ./results/nomults_annrev_gp.csv
+#           ./results/nomults_annrev_ha12.csv
+#           ./results/nomults_annrev_all.csv
+
+
+
+#  MULTIPLIERS, VALUES NOT CALCULATED -----------------------------------------
+
+# results commercial sector catch with port multipliers
+#           ./results/revenue_bycommsector_wportmults_adj.csv
+#           ./results/revenue_bycommsector_wportmults_gp.csv
+#           ./results/revenue_bycommsector_wportmults_ha12.csv
+#           ./results/revenue_bycommsector_wportmults_all.csv
+
+# results commercial sector catch with CA multipliers
+#           ./results/revenue_bycommsector_wCAmults_adj.csv
+#           ./results/revenue_bycommsector_wCAmults_gp.csv
+#           ./results/revenue_bycommsector_wCAmults_ha12.csv
+#           ./results/revenue_bycommsector_wCAmults_all.csv
+
+
+
+#  MULTIPLIERS, VALUES CALCULATED -----------------------------------------
+
+# economic contributions - port level multipliers, with commodity info  ----------------------
+#           ./results/econcontributions_portlevel_adj.csv
+#           ./results/econcontributions_portlevel_gp.csv
+#           ./results/econcontributions_portlevel_ha12.csv
+#           ./results/econcontributions_portlevel_all.csv
+
+# economic contributions - state level multipliers, with commodity info ----------------------
+#           ./results/econcontributions_statelevel_adj.csv
+#           ./results/econcontributions_statelevel_gp.csv
+#           ./results/econcontributions_statelevel_ha12.csv
+#           ./results/econcontributions_statelevel_all.csv
+
+# economic contributions - state level multipliers, no commodity info----------------------
+#           ./results/econcontributions_statelevel_ann_adj.csv
+#           ./results/econcontributions_statelevel_ann_gp.csv
+#           ./results/econcontributions_statelevel_ann_ha12.csv
+#           ./results/econcontributions_statelevel_ann_all.csv
 #           
 
 
 
-
-
-
-# ------------------------------------------------------------------------------------------
-# Fisheries data with economic outputs - code adapted from Jack ----------------------------
-
-
-# summarize econ and iopac data by dsc association types
-source("./bin/fishtix_econ_dsc_summarize.R")
-# input:     ./results/triptix_allCA3_io_pac.csv
-#           ./data/IMPLAN/comm_mults_2020.csv
-# output:   files below, plus versions for other association types ..........
-
-# landings without multipliers
-#           ./results/nomults_port_bl.csv   
-#           ./results/nomults_commodity_bl.csv
-#           ./results/nomults_annrev_bl.csv
-
-# multipliers, but values NOT calculated
-#           ./results/revenue_bycommsector_wportmults_bl.csv
-#           ./results/revenue_bycommsector_wCAmults_bl.csv
-
-# values calculatd from multipliers
-#           ./results/econcontributions_portlevel_bl.csv                 # economic contributions - port multipliers
-#           ./results/ec_port_com_all_long.csv                          # economic contributions - port multipliers, with commodity info
-#           ./results/econcontributions_statelevel_bl.csv                # economic contributions - state level multipliers, with commodity info
-#           ./results/econcontributions_statelevel_ann_bl.csv            # economic contributions - state level multipliers, no commodity info
-
+# ANALYSES ETC ------------------------------------------------------
 
 
 # code from DSC conference -----------------------------------------
 
-# clean commodity code descriptions
-source("./bin/commodity_codes_clean.R")
-# input:     ./data/commcd_dat.csv
-# output:    ./results/commcd_dat2.csv
+
 
 # change data from wide to long #updated ------------------------------------
 # since no multiplier data is in long form, removed those data from this code

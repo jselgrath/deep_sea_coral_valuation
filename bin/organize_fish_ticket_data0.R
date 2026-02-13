@@ -2,7 +2,7 @@
 # NOAA CINMS
 # Deep Sea Coral Valuation
 
-# goal: combine landings for cdfw commercial landings data and create option with no PII
+# goal: combine landings for cdfw commercial landings data. create option with no PII
 
 # ---------------------------------------------------
 library(tidyverse)

@@ -21,7 +21,7 @@ setwd("G:/My Drive/research/r_projects/dsc_valuation")
 
 d00<-read_csv("./data/gear_translations_pacfin.csv")%>%
   mutate(pacfin_gear_code=PACFIN_GEAR_CODE,pacfin_gear_type_code=GEAR_TYPE_CODE, pacfin_gear_group_code=PACFIN_GROUP_GEAR_CODE, pacfin_gear_name=PACFIN_GEAR_NAME, pacfin_gear_description=PACFIN_GEAR_DESCRIPTION)%>%
-  select(pacfin_gear_code:pacfin_gear_description,ACTIVE_DATE,EXPIRE_DATE)%>%
+  select(pacfin_gear_code:pacfin_gear_description,pacfin_gear_active_date=ACTIVE_DATE,pacfin_gear_expire_date=EXPIRE_DATE)%>%
   unique()%>%
   glimpse()
 
@@ -30,7 +30,7 @@ d0<-read_csv("./data/gear_translations_pacfin2.csv")%>%
   mutate(cdfw_gear_id=as.numeric(GEAR_CODE))%>%
   mutate(cdfw_gear_name=GEAR_NAME,pacfin_gear_code=PACFIN_GEAR_CODE,pacfin_gear_description=GEAR_DESCRIPTION)%>%
   filter(AGENCY_CODE=="C")%>% #California
-  select(cdfw_gear_id:pacfin_gear_code,ACTIVE_DATE,EXPIRE_DATE)%>%
+  select(cdfw_gear_id:pacfin_gear_code,cdfw_gear_active_date=ACTIVE_DATE,cdfw_gear_expire_date=EXPIRE_DATE)%>%
   unique()%>%
   glimpse()
 
@@ -41,7 +41,7 @@ d000<-d00%>%
   filter(pacfin_gear_type_code==1)%>% # specific gears (1), not groups (2) or all gears
   select(-pacfin_gear_type_code)%>%
   right_join(d0)%>%
-  select(cdfw_gear_id,pacfin_gear_code, pacfin_gear_group_code, pacfin_gear_description, ACTIVE_DATE)%>% #, EXPIRE_DATE - has no info
+  select(cdfw_gear_id,pacfin_gear_code, pacfin_gear_group_code, pacfin_gear_description, cdfw_gear_active_date)%>% #, EXPIRE_DATE - has no info
   unique()%>%
   arrange(cdfw_gear_id)%>%
   glimpse()
@@ -54,10 +54,10 @@ d1<-read_csv("./data/gear_key_iopac.csv")%>%
   glimpse()
 
 
-
-d2<-read_csv("./data/gear_key_cdfw.csv")%>% # from chris free - jenny added pacfin gear group based on best estimation (=pacfin_gear_group1)
+# from chris free - jenny added pacfin gear group based on best estimation (=pacfin_gear_group1)
+d2<-read_csv("./data/gear_key_cdfw.csv")%>% 
   # filter(as.character(discontinued_date) != "4/1/1996"| is.na(discontinued_date))%>% #before study period
-  select(cdfw_gear_id=gear_code,cdfw_gear_name=gear,discontinued_date,gear_type_free,pacfin_gear_group1)%>% # ,gear_type_free,pacfin_gear_group1
+  select(cdfw_gear_id=gear_code,cdfw_gear_name=gear,cdfw_gear_discontinued_date=discontinued_date,gear_type_free,pacfin_gear_group1)%>% # ,gear_type_free,pacfin_gear_group1
   # filter(cdfw_gear_id!=95|cdfw_gear_id!=17)%>% #Raft/Lines For Herring Roe On Kelp & kelp barge
   arrange(cdfw_gear_id)%>%
   unique()%>%
@@ -128,7 +128,7 @@ d4
 
 d5<-d4%>%
   left_join(d3)%>% # drops Non-trawl gear id=2 (1 line)
-  select(cdfw_gear_id, cdfw_gear_name, pacfin_gear_code,pacfin_gear_description, pacfin_gear_group_id, pacfin_gear_group_code, pacfin_gear_group_name, iopac_gear_group,ACTIVE_DATE,discontinued_date)%>%
+  select(cdfw_gear_id, cdfw_gear_name, pacfin_gear_code,pacfin_gear_description, pacfin_gear_group_id, pacfin_gear_group_code, pacfin_gear_group_name, iopac_gear_group,cdfw_gear_active_date,cdfw_gear_discontinued_date)%>%
   
   # add names for new gears
   mutate(cdfw_gear_name=if_else(cdfw_gear_id==85,"Stationary Vertical Midwater Jig",cdfw_gear_name))%>%

@@ -25,23 +25,26 @@ setwd("G:/My Drive/research/r_projects/dsc_valuation")
 d1<-read_csv("./data/port_translations_pacfin.csv")%>%
   filter(AGENCY_CODE=="C")%>% #California
   filter(PORT_TYPE_CODE=="1")%>% #California & only ports (1) not groups (2) or all (3)
-  mutate(pacfin_port_code=PACFIN_PORT_CODE)%>%
-  select(-AGENCY_CODE,-EXPIRE_DATE,-PACFIN_PORT_CODE)%>%
+  mutate(pacfin_port_code=PACFIN_PORT_CODE,pacfin_port_active_date=ACTIVE_DATE)%>%
+  select(-AGENCY_CODE,-EXPIRE_DATE,-PACFIN_PORT_CODE,-ACTIVE_DATE)%>%
   unique()%>%
   glimpse()
 d1
-# d1%>%filter(pacfin_port_code=="MCR"|pacfin_port_code=="BCR")%>%view() # MNA = PACFIN CODE
+
+
 
 
 d2<-read_csv("./data/port_translations_pacfin2.csv")%>%
   filter(AGENCY_CODE=="C")%>% #California
   mutate(cdfw_port_id=as.numeric(PORT_CODE),
          cdfw_port_name=PORT_NAME)%>%
-  select(cdfw_port_id,cdfw_port_name,pacfin_port_code=PACFIN_PORT_CODE,county_code=COUNTY_CODE,congressional_district=CONGRESSIONAL_DISTRICT,active_date=ACTIVE_DATE, latitude=LATITUDE, longitude=LONGITUDE)%>%
+  select(cdfw_port_id,cdfw_port_name,pacfin_port_code=PACFIN_PORT_CODE,county_code=COUNTY_CODE,congressional_district=CONGRESSIONAL_DISTRICT,cdfw_port_active_date=ACTIVE_DATE, latitude=LATITUDE, longitude=LONGITUDE)%>%
   unique()%>%
   arrange(cdfw_port_id)%>%
   glimpse()
 d2
+
+
 
 # original port list
 d3 <- read_csv("./data/portlist_allCA3.csv")%>% 
@@ -49,18 +52,26 @@ d3 <- read_csv("./data/portlist_allCA3.csv")%>%
          cdfw_port_id=PortID)%>%
   unique()%>%
   filter(!is.na(iopac_port_complex))%>%
+  filter(iopac_port!="PRINCETON-HALF MOON")%>% # duplicate
   arrange(cdfw_port_id)%>%
   glimpse()
 d3
 
-# from chris free
+d3%>%
+  group_by(cdfw_port_id)%>%
+  summarize(port_n=length(cdfw_port_id))%>%
+  filter(port_n>1)
+
+
+
+# from chris free - for discontinued dates
 d4<-read_csv("./data/port_key_cdfw.csv")%>%
   # mutate(clean_key = str_replace_all(cdfw_port, "[^[:alnum:]]", "") %>% tolower())%>%
   mutate(cdfw_port_id=as.numeric(cdfw_port_code))%>%
+  select(cdfw_port_id,cdfw_port_complex,  cdfw_port_complex_code, cdfw_port_code, cdfw_county_code, cdfw_port_discontinued_date=discontinued_date)%>% #cdfw_port,
+  # filter(cdfw_port_discontinued_date!="1/1/1996"| is.na(cdfw_port_discontinued_date))%>%
+  # filter(cdfw_port_discontinued_date != "1/1/1997" | is.na(cdfw_port_discontinued_date))%>%
   arrange(cdfw_port_id)%>%
-  select(cdfw_port_id,cdfw_port_complex,  cdfw_port_complex_code, cdfw_port_code, cdfw_county_code, discontinued_date)%>% #cdfw_port,
-  filter(discontinued_date!="1/1/1996"| is.na(discontinued_date))%>%
-  filter(discontinued_date != "1/1/1997" | is.na(discontinued_date))%>%
   glimpse()
 d4
 
@@ -84,12 +95,12 @@ d6<-d2%>%
   mutate(county_code =if_else(cdfw_port_id ==-1| cdfw_port_id ==999,"UCA",county_code ))%>%
   mutate(congressional_district  =if_else(cdfw_port_id ==-1| cdfw_port_id ==999,"000",congressional_district  ))%>%
   mutate(IS_SUMMARIZED=if_else(cdfw_port_id ==-1| cdfw_port_id ==999,TRUE,IS_SUMMARIZED))%>%
-  select(cdfw_port_id,cdfw_port_name,     pacfin_port_code, pacfin_port_complex_code=PACFIN_GROUP_PORT_CODE, pacfin_county_code=county_code,  congressional_district, ACTIVE_DATE, latitude, longitude,  SAMPLING_GROUP_CODE, PORT_TYPE_CODE,PORT_ORDER)%>%
+  select(cdfw_port_id,cdfw_port_name,     pacfin_port_code, pacfin_port_complex_code=PACFIN_GROUP_PORT_CODE, pacfin_county_code=county_code,  congressional_district, cdfw_port_active_date, pacfin_port_active_date, latitude, longitude,  SAMPLING_GROUP_CODE, PORT_TYPE_CODE,PORT_ORDER)%>%
   
   mutate(cdfw_port_id=as.numeric(cdfw_port_id))%>%
   arrange(cdfw_port_id)%>%
   select(-SAMPLING_GROUP_CODE,-PORT_TYPE_CODE)%>%
-  select(cdfw_port_id:pacfin_county_code,congressional_district,active_date=ACTIVE_DATE, latitude, longitude, port_order=PORT_ORDER)%>%
+  select(cdfw_port_id:pacfin_county_code,congressional_district,cdfw_port_active_date, pacfin_port_active_date, latitude, longitude, port_order=PORT_ORDER)%>%
   glimpse()
 d6
 
@@ -121,14 +132,24 @@ d8<-d7%>%
   mutate(iopac_port_complex=if_else(is.na(iopac_port_complex),"Unknown",iopac_port_complex))%>%
   mutate(pacfin_port_complex=if_else(is.na(clean_pacfin_port_complex),"CALIFORNIA2 AREA PORTS",clean_pacfin_port_complex))%>%
   mutate(clean_pacfin_port_complex=if_else(is.na(clean_pacfin_port_complex),"California2",clean_pacfin_port_complex))%>%
-  select(cdfw_port_id, cdfw_port_name,pacfin_port_code,pacfin_port_complex_code,pacfin_port_complex,clean_pacfin_port_complex,iopac_port,iopac_port_complex,pacfin_county_code,congressional_district,active_date,latitude, longitude,port_order)%>%
+  select(cdfw_port_id, cdfw_port_name,pacfin_port_code,pacfin_port_complex_code,pacfin_port_complex,clean_pacfin_port_complex,iopac_port,iopac_port_complex,pacfin_county_code,congressional_district,pacfin_port_active_date,cdfw_port_active_date, latitude, longitude,port_order)%>%
   glimpse()
-glimpse(d8)
+
 d8
 unique(d8$pacfin_port_complex)
 
 names(d8)
 
+# join with chris free data to remove port codes stopped using pre-2010
+d9<-d4%>%
+  select(cdfw_port_id,cdfw_port_complex_code,cdfw_county_code,cdfw_port_discontinued_date)%>%
+  right_join(d8)%>%
+  filter(cdfw_port_discontinued_date!="1/1/1996"| is.na(cdfw_port_discontinued_date))%>%
+  filter(cdfw_port_discontinued_date != "1/1/1997" | is.na(cdfw_port_discontinued_date))%>%
+  glimpse()
+d9  
+
 
 # save
 write_csv(d8,"./results/port_key_final.csv")
+write_csv(d9,"./results/port_key_final2.csv")
